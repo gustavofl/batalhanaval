@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <title>Início</title>
+        <meta charset="utf-8">
+    </head>
+    <body>
+    	
+    	<center>
+	    	<table onkeypress="botao_acionado(event)">
+	    	<tr>
+		    	<td>
+			    	<center>
+			    		<h2>Posicione os seus navios</h2>
+
+						<table border="1" id="tabuleiro1"></table>
+			    	</center>
+		    	</td>
+
+		    	<td>
+		    	  <div>
+				    <input type="radio" id="escolhaNavio1"
+				     name="tipo_navio" value="navio_3casas" checked>
+				    <label for="escolhaNavio1">Navio (3 casas)</label>
+
+				    <br>
+
+				    <input type="radio" id="escolhaNavio2"
+				     name="tipo_navio" value="navio_5casas">
+				    <label for="escolhaNavio2">Submarino (5 casas)</label>
+
+				    <br>	
+
+				    <input type="radio" id="escolhaNavio3"
+				     name="tipo_navio" value="navio_7casas">
+				    <label for="escolhaNavio3">Porta Aviões (7 casas)</label>
+				  </div>
+
+				  <p>Aperte espaço para virar o navio</p>
+		    	</td>
+	    	</tr>
+	    	</table>
+
+
+	    	<button type="button" onclick="iniciar_jogo();">Iniciar Jogo</button> 
+
+	    	<h4 id="aviso" style="color:red;"></h4>
+    	</center>
+
+        <script type="text/javascript" src="index.js"></script>
+    </body>
+</html>
