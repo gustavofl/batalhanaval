@@ -192,6 +192,27 @@ function tamanho_do_navio(){
 	}
 }
 
+function tamanho_do_navio_2(){ 
+	// lista opcoes para o tamanho do navio
+	var opt_check = document.getElementsByName('tipo_navio')
+
+	// indice da lista que esta marcada
+	var opcao_escolhida = -1
+
+	// procura na lista qual o navio escolhido
+	for(var i=0; i<opt_check.length; i++){
+		if(opt_check[i].checked){
+			opcao_escolhida = i;
+			break;
+		}
+	}
+
+	// estrai do valor do navio escolhido qual o seu tamanho
+	var tamanho = parseInt(opt_check[opcao_escolhida].value.replace(/navio_(\d+)casas/, '$1'))
+
+	return tamanho
+}
+
 function iniciar_jogo() {
 	// alterar a url da pagina para iniciar o jogo
 	window.location = "./jogo.html";
