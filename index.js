@@ -4,23 +4,8 @@ var tamanho_casas_px = 30;
 var qnt_navios = 0
 var orientacao = 'vertical'
 
-/*
 var lista_navios = []
-
-function Navio(tamanho, coordenadas, orientacao){
-	this.tamanho = tamanho
-	this.coordenadas = coordenadas
-	this.orientacao = orientacao
-
-	// retorna as casas ocupadas por este navio
-	this.casas = (function {
-		var casas = []
-		for (var i = 0; i < tamanho; i++) {
-				
-		}
-	})
-}
-*/
+var novo_navio = null
 
 // criar o tabuleiro
 criarTabuleiro();
@@ -64,6 +49,19 @@ function criarTabuleiro() {
 	};
 }
 
+function navio_valido(navio){
+	valido = true
+
+	navio.casas().forEach(function(coord){
+		var id = "cel:"+coord.x+"-"+coord.y
+		var celula = document.getElementById(id)
+		if(celula == null || celula.className == "navio")
+			valido = false
+	})
+
+	return valido
+}
+
 function mostrar_navio() {
 	// Evento quando o mouse passar por cima de uma imagem
 	// alterar a cor da celula em que ocorre o evento e em casas na sequencia
@@ -78,48 +76,21 @@ function mostrar_navio() {
 	// identificar qual o tamanho do navio a ser mostrado
 	var tam_navio = tamanho_do_navio();
 
-	// Se ha alguma casa mostrando um navio a ser fixado: limpar as casas
-	if(document.getElementsByClassName('novo_navio').length != 0){
-		mostrar_mar();
-	}
+	// Limpar tabuleiro (apenas os navios temporarios), caso haja algum navio temporario no tabuleiro
+	mostrar_mar();
 
-	// casas em que o novo navio sera inserido
-	var casas_novos_navios = []
+	novo_navio = new Navio(tam_navio, new Coordenada(linha, coluna), orientacao)
 
-	// verifica se as casas estao disponiveis para adicionar um navio
-	if(orientacao == 'vertical'){
-		// Para navios na vertical
-		for (var i = linha ; i < linha+tam_navio ; i++){
-			var id = "cel:"+i+"-"+coluna;
-
+	if(navio_valido(novo_navio)){
+		novo_navio.casas().forEach(function(coord){
+			var id = "cel:"+coord.x+"-"+coord.y
 			var celula = document.getElementById(id)
-
-			// verifica se existe esta casa no tabuleiro e se ja existe algum navio nesta posicao
-			if(celula != null && celula.className != "navio")
-				casas_novos_navios.push(celula) // add a celula da tabela na lista
-		}
+			celula.className = "novo_navio"
+    		celula.getElementsByTagName("img")[0].src = "./imagens/index_novo_navio.png";
+		})
 	}else{
-		// Para navios na horizontal
-		for (var i = coluna ; i < coluna+tam_navio ; i++){
-			var id = "cel:"+linha+"-"+i;
-
-			var celula = document.getElementById(id)
-
-			// verifica se existe esta casa no tabuleiro e se ja existe algum navio nesta posicao
-			if(celula != null && celula.className != "navio")
-				casas_novos_navios.push(celula) // add a celula da tabela na lista
-		}
+		novo_navio = null
 	}
-
-	// Se a quantidade de casas adicionadas na lista for diferente do tamanho do navio entao nao e possivel add o navio
-	if(casas_novos_navios.length != tam_navio)
-		return
-
-	// Se nao tiver nenhum problema, entao mostrar que e possivel add o navio nesta posicao
-	casas_novos_navios.forEach(function(celula){
-    	celula.className = "novo_navio"
-    	celula.getElementsByTagName("img")[0].src = "./imagens/index_novo_navio.png";
-  	});
 }
 
 function mostrar_mar() {
@@ -231,4 +202,28 @@ function mudarOrientacao(){
 		orientacao = 'horizontal'
 	else
 		orientacao = 'vertical'
+}
+
+function analizar_cookie () {
+	// Analizar o cookie da pagina para identificar os navios adicionados pelo usuario
+
+	if(qnt_navios == 0){
+		console.log("ainda nao foram inseridos navios...")
+		return
+	}
+
+	// le as informacoes do navio
+	var regex = new RegExp(".*\\bnavio"+qnt_navios+"\\s*=\\s*([^;]*).*")
+	var info_navio = document.cookie.replace(regex, '$1')
+
+	// analisa e separa as informacoes
+	var casas = parseInt(info_navio.replace(/.*casas:([^,]*).*/, '$1'))
+	var coordenadas = info_navio.replace(/.*coordenadas:([^,]*).*/, '$1').split('-')
+	var orientacao = info_navio.replace(/.*orientacao:([^,]*).*/, '$1')
+
+	// mostra no console
+	console.log('NAVIO '+qnt_navios+': ')
+	console.log('\t'+casas)
+	console.log('\t('+coordenadas[0]+','+coordenadas[1]+')')
+	console.log('\t'+orientacao+'\n')
 }
