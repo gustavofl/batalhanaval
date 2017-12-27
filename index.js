@@ -221,12 +221,14 @@ function iniciar_jogo() {
 function verificarTeclaPressionada(event){
 	// Verificar se foi pressionado a Barra de Espaço
 
-    if(event.which == 32) { // codigo da Barra de Espaço = 32
+    if(event.which == 32) // codigo da Barra de Espaço = 32
+    	mudarOrientacao()
+}
 
-    	// alternar entre horizontal e vertical
-    	if(orientacao == 'vertical')
-    		orientacao = 'horizontal'
-    	else
-    		orientacao = 'vertical'
-    }
+function mudarOrientacao(){
+	// alternar entre horizontal e vertical
+	if(orientacao == 'vertical')
+		orientacao = 'horizontal'
+	else
+		orientacao = 'vertical'
 }
