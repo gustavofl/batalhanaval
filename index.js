@@ -4,6 +4,8 @@ var tamanho_casas_px = 30;
 var qnt_navios = 0
 var orientacao = 'vertical'
 
+var lista_tam_navios = [ 3, 5, 7 ]
+
 /*
 var lista_navios = []
 
@@ -24,6 +26,43 @@ function Navio(tamanho, coordenadas, orientacao){
 
 // criar o tabuleiro
 criarTabuleiro();
+criarOpcoesTamanhos();
+
+function criarOpcoesTamanhos() {
+	// Cria as opcoes na pagina conforme os tamanhos na lista_tam_navios
+
+	// div onde ficam as opcoes
+	var div = document.getElementById('opcoes_tamanho_navio')
+
+	// Para cada tamanho em lista_tam_navios
+	lista_tam_navios.forEach(function(tam, indice){ 
+
+		// cria um elemento HTML input
+		var input = document.createElement('input')
+		input.type='radio'
+		input.id='escolhaNavio'+(indice+1)
+		input.name='tipo_navio'
+		input.value=''+tam
+
+		// se for o primeiroa ser adicionado deixar marcado como padrao
+		if(indice == 0)
+			input.checked = true
+
+		// add o input na div
+		div.appendChild(input)
+
+		// criar o elemento label, que e o texto (rotulo) que aparece pro usuario
+		var label = document.createElement('label')
+		label.for = 'escolhaNavio'+(indice+1)
+		label.innerHTML = 'Navio ('+tam+' casas)'
+
+		// add o label na div
+		div.appendChild(label)
+
+		// add um pula linha na div
+		div.appendChild(document.createElement('br'))
+	})
+}
 
 function criarTabuleiro() {
 
@@ -181,18 +220,7 @@ function add_navio() {
 	}
 }
 
-function tamanho_do_navio(){
-	// analiza na pagina qual o tamanho do navio que o usuario escolheu
-	if(document.getElementById("escolhaNavio1").checked){
-		return 3;
-	}else if(document.getElementById("escolhaNavio2").checked){
-		return 5;
-	}else if(document.getElementById("escolhaNavio3").checked){
-		return 7;
-	}
-}
-
-function tamanho_do_navio_2(){ 
+function tamanho_do_navio(){ 
 	// lista opcoes para o tamanho do navio
 	var opt_check = document.getElementsByName('tipo_navio')
 
