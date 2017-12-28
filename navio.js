@@ -2,6 +2,7 @@ function Navio(tamanho, coordenadas, orientacao){
 	this.tamanho = tamanho // inteiro
 	this.coordenadas = coordenadas // array de tamanho 2
 	this.orientacao = orientacao // String
+	this.casasAtingidas = (new Array(this.tamanho)).fill(false) // array de booleanos indicando quais casas do navio forma atingidas
 
 	// retorna as casas ocupadas por este navio
 	this.casas = function(){
@@ -15,15 +16,40 @@ function Navio(tamanho, coordenadas, orientacao){
 		return lista_casas
 	}
 
-	this.colisaoCasa = function(coord){
-		var colide = false
+	this.ocupaCasa = function(coord){
+		if(this.indiceCasa(coord) == -1)
+			return false
+		else
+			return true
+	}
 
-		this.casas().forEach(function(casa){
-			if(casa.equals(coord))
-				colide = true
+	this.indiceCasa = function(coord){
+		var indice = -1
+		
+		this.casas().forEach(function(casa, index){
+			if(coord.equals(casa)){
+				indice = index
+			}
 		})
 
-		return colide
+		return indice
+	}
+
+	this.atingiuCasa = function(coord){
+		var indice = this.indiceCasa(coord)
+		if(indice != -1)
+			this.casasAtingidas[ indice ] = true
+	}
+
+	this.destruido = function(){
+		destruido = true
+
+		this.casasAtingidas.forEach(function(valor){
+			if(valor == false)
+				destruido = false
+		})
+
+		return destruido
 	}
 }
 
