@@ -1,12 +1,10 @@
 
 var tamanho_tabuleiro = 10;
 var tamanho_casas_px = 30;
+var lista_navios = [];
 
 // procurar no cookie os navios adicionados pelo usuario
 analizar_cookie()
-
-// array com as posicoes dos navios
-var barco = [[1,1],[1,2],[1,3]];
 
 // mostra os cookies do navegador no console
 // (para ver o console aperte F12 no navegador e clique na aba console)
@@ -65,22 +63,40 @@ function clique_casa() {
 	var linha = parseInt(coordenadas_cel[0]);
 	var coluna = parseInt(coordenadas_cel[1]);
 
-	// verifica se essa casa esta associada a algum navio
-	var eh_barco = false;
-	for (var i = 0; i < barco.length; i++) {
-		if(linha == barco[i][0] && coluna == barco[i][1]){
-			eh_barco = true;
-		}
-	};
-
-	console.log(eh_barco)
+	var coord = new Coordenada(linha, coluna)
+	var navio = obter_navio(coord)
+	
+	if(navio == null){
+		// se não tiver um navio associado a essa casa então ecertou o mar
+		this.className = "acertou_mar"
+		this.src = "./imagens/jogo_acertou_mar.png";
+		return
+	}
 
 	// se tiver um navio associado a essa casa entao acertou um navio
-	if(eh_barco){
-		this.src = "./imagens/jogo_acertou_navio.png";
-	}else{ // se não tiver um navio associado a essa casa então ecertou o mar
-		this.src = "./imagens/jogo_acertou_mar.png";
+	this.className = "acertou_navio"
+	this.src = "./imagens/jogo_acertou_navio.png";
+
+	navio.atingiuCasa(coord)
+
+	if(navio.destruido()){
+		// mostrar para o usuario
+		console.log("navio destruido")
 	}
+}
+
+function obter_navio(coord) {
+	// verifica se essa coordenada esta associada a algum navio e o retorna
+
+	var navioNaPosicao = null
+
+	lista_navios.forEach(function(navio){
+		if(navio.ocupaCasa(coord)){
+			navioNaPosicao = navio
+		}
+	})
+
+	return navioNaPosicao
 }
 
 function analizar_cookie () {
@@ -101,10 +117,8 @@ function analizar_cookie () {
 		var coordenadas = info_navio.replace(/.*coordenadas:([^,]*).*/, '$1').split('-')
 		var orientacao = info_navio.replace(/.*orientacao:([^,]*).*/, '$1')
 
-		// mostra no console
-		console.log('NAVIO '+i+': ')
-		console.log('\t'+casas)
-		console.log('\t('+coordenadas[0]+','+coordenadas[1]+')')
-		console.log('\t'+orientacao+'\n')
+		lista_navios.push(new Navio(casas, new Coordenada(parseInt(coordenadas[0]), parseInt(coordenadas[1])), orientacao))
 	}
+
+	console.log(lista_navios)
 }

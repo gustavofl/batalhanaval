@@ -21,7 +21,10 @@
 		    	  <div id="opcoes_tamanho_navio">
 				  </div>
 
-				  <p>Aperte espaço para virar o navio</p>
+				  <p>Aperte <button type="button" onclick="mudarOrientacao()">espaço</button> para virar o navio</p>
+				  <p><button type="button" onclick="desfazer()">Desfazer</button></p>
+				  <p><button type="button" onclick="configurar_proximo_click_para_modificar_navio()">Modificar Navio</button></p>
+				  <p id="aviso_modificar_navio" style='color:red;'></p>
 		    	</td>
 	    	</tr>
 	    	</table>
@@ -32,6 +35,7 @@
 	    	<h4 id="aviso" style="color:red;"></h4>
     	</center>
 
+    	<script type="text/javascript" src="navio.js"></script>
         <script type="text/javascript" src="index.js"></script>
     </body>
 </html>

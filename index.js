@@ -1,28 +1,18 @@
 
 var tamanho_tabuleiro = 10;
 var tamanho_casas_px = 30;
-var qnt_navios = 0
 var orientacao = 'vertical'
 
-var lista_tam_navios = [ 3, 5, 7 ]
+var lista_tam_navios = [ 2, 3, 4, 5, 7 ]
 
-/*
+// indica se o proximo click no tabuleiro sera para modificar um navio
+var modificar_navio = false
+
+// lista de navios adicionados
 var lista_navios = []
 
-function Navio(tamanho, coordenadas, orientacao){
-	this.tamanho = tamanho
-	this.coordenadas = coordenadas
-	this.orientacao = orientacao
-
-	// retorna as casas ocupadas por este navio
-	this.casas = (function {
-		var casas = []
-		for (var i = 0; i < tamanho; i++) {
-				
-		}
-	})
-}
-*/
+// navio temporario, que aparece ao usuario anter de ser fixado
+var novo_navio = null
 
 // criar o tabuleiro
 criarTabuleiro();
@@ -91,7 +81,7 @@ function criarTabuleiro() {
 			// quando o mouse sai de cima da imagem
 			img.onmouseout = mostrar_mar;
 			// quando ocorre um click na imagem
-			img.onclick = add_navio;
+			img.onclick = click_mouse;
 
 			// add imagem na celula da tabela
 			celula.appendChild(img);
@@ -103,10 +93,29 @@ function criarTabuleiro() {
 	};
 }
 
+function navio_valido(navio){
+	// Verifica as casas que o navio ira ocupar, pra ve se existem e estao livres
+
+	var valido = true
+	
+	navio.casas().forEach(function(coord){
+		var id = "cel:"+coord.x+"-"+coord.y
+		var celula = document.getElementById(id)
+		if(celula == null || celula.className == "navio")
+			valido = false
+	})
+
+	return valido
+}
+
 function mostrar_navio() {
 	// Evento quando o mouse passar por cima de uma imagem
 	// alterar a cor da celula em que ocorre o evento e em casas na sequencia
 	// para mostrar um navio
+
+	// caso esteja escolhendo o navio pra modifica, nao mostrar um novo_navio
+	if(modificar_navio)
+		return
 
 	// identificacao das coordenadas onde ocorreu o evento
 	var id_cel = this.parentElement.id;
@@ -117,48 +126,24 @@ function mostrar_navio() {
 	// identificar qual o tamanho do navio a ser mostrado
 	var tam_navio = tamanho_do_navio();
 
-	// Se ha alguma casa mostrando um navio a ser fixado: limpar as casas
-	if(document.getElementsByClassName('novo_navio').length != 0){
-		mostrar_mar();
-	}
+	// Limpar tabuleiro (apenas os navios temporarios), caso haja algum navio temporario no tabuleiro
+	mostrar_mar();
 
-	// casas em que o novo navio sera inserido
-	var casas_novos_navios = []
+	// cria um novo navio, que e mostrado ao usuario antes de ser fixado
+	novo_navio = new Navio(tam_navio, new Coordenada(linha, coluna), orientacao)
 
-	// verifica se as casas estao disponiveis para adicionar um navio
-	if(orientacao == 'vertical'){
-		// Para navios na vertical
-		for (var i = linha ; i < linha+tam_navio ; i++){
-			var id = "cel:"+i+"-"+coluna;
+	if(navio_valido(novo_navio)){
+		// Se for possivel adicionar o navio nessa posição, mostrar o novo navio ao usuario
 
+		novo_navio.casas().forEach(function(coord){
+			var id = "cel:"+coord.x+"-"+coord.y
 			var celula = document.getElementById(id)
-
-			// verifica se existe esta casa no tabuleiro e se ja existe algum navio nesta posicao
-			if(celula != null && celula.className != "navio")
-				casas_novos_navios.push(celula) // add a celula da tabela na lista
-		}
+			celula.className = "novo_navio"
+    		celula.getElementsByTagName("img")[0].src = "./imagens/index_novo_navio.png";
+		})
 	}else{
-		// Para navios na horizontal
-		for (var i = coluna ; i < coluna+tam_navio ; i++){
-			var id = "cel:"+linha+"-"+i;
-
-			var celula = document.getElementById(id)
-
-			// verifica se existe esta casa no tabuleiro e se ja existe algum navio nesta posicao
-			if(celula != null && celula.className != "navio")
-				casas_novos_navios.push(celula) // add a celula da tabela na lista
-		}
+		novo_navio = null
 	}
-
-	// Se a quantidade de casas adicionadas na lista for diferente do tamanho do navio entao nao e possivel add o navio
-	if(casas_novos_navios.length != tam_navio)
-		return
-
-	// Se nao tiver nenhum problema, entao mostrar que e possivel add o navio nesta posicao
-	casas_novos_navios.forEach(function(celula){
-    	celula.className = "novo_navio"
-    	celula.getElementsByTagName("img")[0].src = "./imagens/index_novo_navio.png";
-  	});
 }
 
 function mostrar_mar() {
@@ -176,48 +161,101 @@ function mostrar_mar() {
   	});
 }
 
+function configurar_proximo_click_para_modificar_navio() {
+
+	// Caso nao tenha nenhum navio adicionado
+	if(lista_navios.length == 0)
+		return
+
+	// mostrar uma mensagem pedindo que o usuario escolha o navio
+	document.getElementById('aviso_modificar_navio').innerHTML="Selecione o navio a ser modificado."
+
+	modificar_navio = true
+}
+
+function click_mouse() {
+	// Verifica se o click do mouse vai ser para adicionar ou modificar um navio
+
+	if(modificar_navio)
+		alterar_navio(this)
+	else
+		add_navio()
+}
+
+function alterar_navio(casa_tabuleiro) {
+
+	// identificacao das coordenadas onde ocorreu o evento
+	var id_cel = casa_tabuleiro.parentElement.id;
+	var coordenadas_cel = id_cel.split(":")[1].split("-");
+	var linha = parseInt(coordenadas_cel[0]);
+	var coluna = parseInt(coordenadas_cel[1]);
+
+	var coord = new Coordenada(linha, coluna)
+
+	// busca o navio que ocupa essa coordenada na lista de navios
+	var navio = getNavioPelaPosicao(coord, lista_navios)
+
+	remover_navio(navio)
+
+	// configuracao para que o proximo navio a ser adicionado seja identico ao que foi removido
+	setTamanhoNavio(navio.tamanho)
+	orientacao = navio.orientacao
+
+	// retira o aviso para escolher um navio para ser modificado
+	document.getElementById('aviso_modificar_navio').innerHTML=""
+
+	modificar_navio = false
+}
+
 function add_navio() {
 	// inicia a mensagem de aviso como vazia
 	document.getElementById("aviso").innerHTML = "";
 
-	// busca na pagina por elementos com o className 'novo_navio'
-	// retorna um HTMLCollection
-	var casas_novos_navios = document.getElementsByClassName('novo_navio')
-
-	// transforma o HTMLCollection em Array
-	casas_novos_navios = Array.from(casas_novos_navios)
-
- 	// Se o array nao estiver vazio: add o navio
-	if(casas_novos_navios.length > 0){
-		// muda as celulas da tabela para fixar o navio
-		casas_novos_navios.forEach(function(celula){
-	    	celula.className = "navio"
-	    	celula.getElementsByTagName("img")[0].src = "./imagens/index_navio_fixado.png";
-	  	});
-
-	  	// identificacao das coordenadas onde ocorreu o evento
-		var id_cel = this.parentElement.id;
-		var coordenadas_cel = id_cel.split(":")[1].split("-");
-		var linha = parseInt(coordenadas_cel[0]);
-		var coluna = parseInt(coordenadas_cel[1]);
-
-		// identificar qual o tamanho do navio a ser removido
-		var tam_navio = tamanho_do_navio();
-
-	  	// add no cookie que foi adicionado um navio nessa posicao
-		var casas = "casas:"+tam_navio;
-		var coordenadas = "coordenadas:" + coordenadas_cel[0]+"-"+coordenadas_cel[1];
-		var orientacao_navio = "orientacao:"+orientacao;
-		document.cookie = "navio"+(++qnt_navios)+"="+casas+","+coordenadas+","+orientacao_navio;
-		document.cookie = "qnt_navios="+qnt_navios
-
-		// mostrar cookie no console 
-		// (para ver o console aperte F12 no navegador e clique na aba console)
-		console.log(document.cookie);
-	}else{
-		// Caso não seja possivel add nessa posicao
+	// Caso não seja possivel add o navio nessa posicao
+	if(novo_navio == null){
 		document.getElementById("aviso").innerHTML = "Não é possível adicionar o navio neste local.";
+		return
 	}
+
+	// muda as celulas da tabela para fixar o navio
+	novo_navio.casas().forEach(function(coord){
+		var id = "cel:"+coord.x+"-"+coord.y
+		var celula = document.getElementById(id)
+		celula.className = "navio"
+		celula.getElementsByTagName("img")[0].src = "./imagens/index_navio_fixado.png";
+	})
+
+	lista_navios.push(novo_navio)
+
+	console.log(lista_navios)
+}
+
+function desfazer() {
+	// Remove o ultimo navio que foi adicionado
+
+	// Caso ainda nao tenha adicionado nenhum navio
+	if(lista_navios.length == 0)
+		return
+
+	// remover o ultimo navio da lista
+	var navio = lista_navios[lista_navios.length-1]
+
+	remover_navio(navio)
+}
+
+function remover_navio(navio) {
+	// remove um navio da lista_navios (é necessário que o objeto navio seja a mesma instancia do elemento que sera removido da lista)
+
+	var indice = lista_navios.indexOf(navio)
+
+	lista_navios.splice(indice,1)
+
+	navio.casas().forEach(function(coord){
+		var id = "cel:"+coord.x+"-"+coord.y
+		var celula = document.getElementById(id)
+		celula.className = "mar"
+		celula.getElementsByTagName("img")[0].src = "./imagens/index_mar.png";
+	})
 }
 
 function tamanho_do_navio(){ 
@@ -241,20 +279,56 @@ function tamanho_do_navio(){
 	return tamanho
 }
 
+function setTamanhoNavio(tamanho) {
+	// altera o tamanho do navio a ser adicionado
+
+	var opt_check = document.getElementsByName('tipo_navio')
+
+	var tamanho_existe = false
+
+	for(var i=0; i<opt_check.length; i++){
+		if(opt_check[i].value == ''+tamanho){
+			opt_check[i].checked = true
+			tamanho_existe = true
+		}
+	}
+
+	if(!tamanho_existe){
+		console.log('Erro ao mudar tamanho do navio: '+tamanho+' não é um tamanho válido.')
+	}
+}
+
 function iniciar_jogo() {
+	// gravar navios no cookie
+	escrever_cookie();
+
 	// alterar a url da pagina para iniciar o jogo
 	window.location = "./jogo.html";
+}
+
+function escrever_cookie() {
+	// salva em cookie os navios adicionados
+	
+	lista_navios.forEach(function(navio, indice){
+		var casas = "casas:"+navio.tamanho;
+		var coordenadas = "coordenadas:" + navio.coordenadas.x + "-" + navio.coordenadas.y;
+		var orientacao_navio = "orientacao:" + navio.orientacao;
+		document.cookie = "navio"+(indice+1)+"="+casas+","+coordenadas+","+orientacao_navio;
+	})
+	document.cookie = "qnt_navios="+lista_navios.length;
 }
 
 function verificarTeclaPressionada(event){
 	// Verificar se foi pressionado a Barra de Espaço
 
-    if(event.which == 32) { // codigo da Barra de Espaço = 32
+    if(event.which == 32) // codigo da Barra de Espaço = 32
+    	mudarOrientacao()
+}
 
-    	// alternar entre horizontal e vertical
-    	if(orientacao == 'vertical')
-    		orientacao = 'horizontal'
-    	else
-    		orientacao = 'vertical'
-    }
+function mudarOrientacao(){
+	// alternar entre horizontal e vertical
+	if(orientacao == 'vertical')
+		orientacao = 'horizontal'
+	else
+		orientacao = 'vertical'
 }
