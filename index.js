@@ -129,6 +129,24 @@ function add_navio() {
 	console.log(lista_navios)
 }
 
+function desfazer() {
+	// Remove o ultimo navio que foi adicionado
+
+	// Caso ainda nao tenha adicionado nenhum navio
+	if(lista_navios.length == 0)
+		return
+
+	// remover o ultimo navio da lista
+	var navio = lista_navios.pop()
+
+	navio.casas().forEach(function(coord){
+		var id = "cel:"+coord.x+"-"+coord.y
+		var celula = document.getElementById(id)
+		celula.className = "mar"
+		celula.getElementsByTagName("img")[0].src = "./imagens/index_mar.png";
+	})
+}
+
 function tamanho_do_navio(){
 	// analiza na pagina qual o tamanho do navio que o usuario escolheu
 	if(document.getElementById("escolhaNavio1").checked){
