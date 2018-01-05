@@ -30,7 +30,7 @@ function criarOpcoesTamanhos() {
 		// cria um elemento HTML input
 		var input = document.createElement('input')
 		input.type='radio'
-		input.id='escolhaNavio'+(indice+1)
+		input.id='escolhaNavio'+tam
 		input.name='tipo_navio'
 		input.value=''+tam
 
@@ -43,8 +43,17 @@ function criarOpcoesTamanhos() {
 
 		// criar o elemento label, que e o texto (rotulo) que aparece pro usuario
 		var label = document.createElement('label')
-		label.for = 'escolhaNavio'+(indice+1)
+		label.setAttribute("for", 'escolhaNavio'+tam)
 		label.innerHTML = 'Navio ('+tam+' casas)'
+
+		// add o label na div
+		div.appendChild(label)
+
+		// label de confirmacao que o navio foi inserido
+		var label = document.createElement('label')
+		label.id = 'labelConfirmacaoNavio'+tam
+		label.setAttribute("for", 'escolhaNavio1')
+		label.setAttribute('style', 'color:green')
 
 		// add o label na div
 		div.appendChild(label)
@@ -125,6 +134,10 @@ function mostrar_navio() {
 
 	// identificar qual o tamanho do navio a ser mostrado
 	var tam_navio = tamanho_do_navio();
+
+	if(verificarSeNavioInserido(tam_navio)){
+		return
+	}
 
 	// Limpar tabuleiro (apenas os navios temporarios), caso haja algum navio temporario no tabuleiro
 	mostrar_mar();
@@ -211,9 +224,19 @@ function add_navio() {
 	// inicia a mensagem de aviso como vazia
 	document.getElementById("aviso").innerHTML = "";
 
+	// identificar qual o tamanho do navio a ser mostrado
+	var tam_navio = tamanho_do_navio();
+
 	// Caso não seja possivel add o navio nessa posicao
 	if(novo_navio == null){
-		document.getElementById("aviso").innerHTML = "Não é possível adicionar o navio neste local.";
+		if(verificarSeNavioInserido(tam_navio)){
+			if(todosNaviosInseridos())
+				document.getElementById("aviso").innerHTML = "Todos os navios já foram inseridos, clique em 'Iniciar Jogo'.";
+			else
+				document.getElementById("aviso").innerHTML = "Já foi inserido um navio de tamanho "+tam_navio+".";	
+		}else
+			document.getElementById("aviso").innerHTML = "Não é possível adicionar o navio neste local.";
+		
 		return
 	}
 
@@ -226,6 +249,9 @@ function add_navio() {
 	})
 
 	lista_navios.push(novo_navio)
+
+	addConfirmacaoNavioInserido(novo_navio.tamanho)
+	novo_navio = null
 
 	console.log(lista_navios)
 }
@@ -241,6 +267,8 @@ function desfazer() {
 	var navio = lista_navios[lista_navios.length-1]
 
 	remover_navio(navio)
+
+	document.activeElement.blur()
 }
 
 function remover_navio(navio) {
@@ -256,6 +284,8 @@ function remover_navio(navio) {
 		celula.className = "mar"
 		celula.getElementsByTagName("img")[0].src = "./imagens/index_mar.png";
 	})
+
+	removerConfirmacaoNavioInserido(navio.tamanho)
 }
 
 function tamanho_do_navio(){ 
@@ -299,6 +329,12 @@ function setTamanhoNavio(tamanho) {
 }
 
 function iniciar_jogo() {
+
+	if(todosNaviosInseridos() == false){
+		document.getElementById("aviso").innerHTML = "Insira todos os navios para iniciar o jogo.";
+		return
+	}
+
 	// gravar navios no cookie
 	escrever_cookie();
 
@@ -310,7 +346,7 @@ function escrever_cookie() {
 	// salva em cookie os navios adicionados
 	
 	lista_navios.forEach(function(navio, indice){
-		var casas = "casas:"+navio.tamanho;
+		var casas = "casas:"+navio.tamanho
 		var coordenadas = "coordenadas:" + navio.coordenadas.x + "-" + navio.coordenadas.y;
 		var orientacao_navio = "orientacao:" + navio.orientacao;
 		document.cookie = "navio"+(indice+1)+"="+casas+","+coordenadas+","+orientacao_navio;
@@ -331,4 +367,53 @@ function mudarOrientacao(){
 		orientacao = 'horizontal'
 	else
 		orientacao = 'vertical'
+}
+
+function addConfirmacaoNavioInserido(tamNavio){
+	var input = document.getElementById('escolhaNavio'+tamNavio)
+	input.disabled = true
+	input.labels[0].setAttribute('style', 'color:gray')
+
+	var label = document.getElementById('labelConfirmacaoNavio'+tamNavio)
+	label.innerHTML = ' OK'
+}
+
+function removerConfirmacaoNavioInserido(tamNavio){
+	var input = document.getElementById('escolhaNavio'+tamNavio)
+	input.disabled = false
+	input.labels[0].setAttribute('style', 'color:black')
+
+	var label = document.getElementById('labelConfirmacaoNavio'+tamNavio)
+	label.innerHTML = ''
+}
+
+function verificarSeNavioInserido(tamNavio){
+	var inserido = false
+
+	lista_navios.forEach(function(navio){
+		if(navio.tamanho == tamNavio)
+			inserido = true
+	})
+
+	return inserido
+}
+
+function todosNaviosInseridos(){
+	var naviosInseridos = true
+
+	lista_tam_navios.forEach(function(tamanho){
+		if(verificarSeNavioInserido(tamanho) == false)
+			naviosInseridos = false
+	})
+
+	return naviosInseridos
+}
+
+function selecionarProximoTamanho(){
+	var tamanho = null
+
+	lista_tam_navios.forEach(function(tamanhos){
+		
+	})
+
 }
