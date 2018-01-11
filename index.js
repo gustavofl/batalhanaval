@@ -21,6 +21,12 @@ criarOpcoesTamanhos();
 function criarOpcoesTamanhos() {
 	// Cria as opcoes na pagina conforme os tamanhos na lista_tam_navios
 
+	// Ordena a lista_tam_navios e remove repeticoes
+	lista_tam_navios.sort()
+	lista_tam_navios = lista_tam_navios.filter(function(elemento, index){
+		return lista_tam_navios.indexOf(elemento) == index
+	})
+
 	// div onde ficam as opcoes
 	var div = document.getElementById('opcoes_tamanho_navio')
 
@@ -43,6 +49,7 @@ function criarOpcoesTamanhos() {
 
 		// criar o elemento label, que e o texto (rotulo) que aparece pro usuario
 		var label = document.createElement('label')
+		label.id = input.id+'_nome'
 		label.setAttribute("for", 'escolhaNavio'+tam)
 		label.innerHTML = 'Navio ('+tam+' casas)'
 
@@ -51,8 +58,7 @@ function criarOpcoesTamanhos() {
 
 		// label de confirmacao que o navio foi inserido
 		var label = document.createElement('label')
-		label.id = 'labelConfirmacaoNavio'+tam
-		label.setAttribute("for", 'escolhaNavio1')
+		label.id = input.id+'_confirmacao'
 		label.setAttribute('style', 'color:green')
 
 		// add o label na div
@@ -268,6 +274,10 @@ function desfazer() {
 
 	remover_navio(navio)
 
+	// retira o aviso para escolher um navio para ser modificado (caso haja)
+	document.getElementById('aviso_modificar_navio').innerHTML=""
+	modificar_navio = false
+
 	document.activeElement.blur()
 }
 
@@ -372,19 +382,23 @@ function mudarOrientacao(){
 function addConfirmacaoNavioInserido(tamNavio){
 	var input = document.getElementById('escolhaNavio'+tamNavio)
 	input.disabled = true
-	input.labels[0].setAttribute('style', 'color:gray')
 
-	var label = document.getElementById('labelConfirmacaoNavio'+tamNavio)
-	label.innerHTML = ' OK'
+	var label_nome = document.getElementById(input.id+'_nome')
+	label_nome.setAttribute('style', 'color:gray')
+
+	var label_confirmacao = document.getElementById(input.id+'_confirmacao')
+	label_confirmacao.innerHTML = ' OK'
 }
 
 function removerConfirmacaoNavioInserido(tamNavio){
 	var input = document.getElementById('escolhaNavio'+tamNavio)
 	input.disabled = false
-	input.labels[0].setAttribute('style', 'color:black')
 
-	var label = document.getElementById('labelConfirmacaoNavio'+tamNavio)
-	label.innerHTML = ''
+	var label_nome = document.getElementById(input.id+'_nome')
+	label_nome.setAttribute('style', 'color:black')
+
+	var label_confirmacao = document.getElementById(input.id+'_confirmacao')
+	label_confirmacao.innerHTML = ''
 }
 
 function verificarSeNavioInserido(tamNavio){
