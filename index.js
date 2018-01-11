@@ -388,6 +388,10 @@ function addConfirmacaoNavioInserido(tamNavio){
 
 	var label_confirmacao = document.getElementById(input.id+'_confirmacao')
 	label_confirmacao.innerHTML = ' OK'
+
+	var prox_tam = selecionarProximoTamanho()
+	if(prox_tam != null)
+		setTamanhoNavio(prox_tam)
 }
 
 function removerConfirmacaoNavioInserido(tamNavio){
@@ -426,8 +430,10 @@ function todosNaviosInseridos(){
 function selecionarProximoTamanho(){
 	var tamanho = null
 
-	lista_tam_navios.forEach(function(tamanhos){
-		
+	lista_tam_navios.forEach(function(tam){
+		if(!verificarSeNavioInserido(tam) && tamanho == null)
+			tamanho = tam
 	})
 
+	return tamanho
 }
