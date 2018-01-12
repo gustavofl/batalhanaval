@@ -3,6 +3,8 @@ var tamanho_tabuleiro = 10;
 var tamanho_casas_px = 30;
 var lista_navios = [];
 
+var lista_tam_navios = []
+
 // procurar no cookie os navios adicionados pelo usuario
 analizar_cookie()
 
@@ -11,13 +13,78 @@ analizar_cookie()
 console.log("BATALHA NAVAL");
 console.log(document.cookie);
 
-// criar tabuleiro
-criarTabuleiro();
+// criar tabuleiros
+criarTabuleiroJogador();
+criarTabuleiroIA();
 
-function criarTabuleiro() {
+mostrarTamanhos()
+
+function mostrarTamanhos() {
+	// Cria as opcoes na pagina conforme os tamanhos na lista_tam_navios
+
+	// div onde ficam as opcoes
+	var div = document.getElementById('tamanhos_navio_jogador')
+
+	// Para cada tamanho em lista_tam_navios
+	lista_tam_navios.forEach(function(tam, indice){ 
+
+		var id_navio = 'escolhaNavio'+tam
+
+		// criar o elemento label, que e o texto (rotulo) que aparece pro usuario
+		var label = document.createElement('label')
+		label.id = id_navio+'_nome'
+		label.setAttribute("for", 'escolhaNavio'+tam)
+		label.innerHTML = 'Navio ('+tam+' casas)'
+
+		// add o label na div
+		div.appendChild(label)
+
+		// label de confirmacao que o navio foi inserido
+		var label = document.createElement('label')
+		label.id = id_navio+'_confirmacao'
+		label.setAttribute('style', 'color:green')
+
+		// add o label na div
+		div.appendChild(label)
+
+		// add um pula linha na div
+		div.appendChild(document.createElement('br'))
+	})
+
+	// div onde ficam as opcoes
+	var div = document.getElementById('tamanhos_navio_ia')
+
+	// Para cada tamanho em lista_tam_navios
+	lista_tam_navios.forEach(function(tam, indice){ 
+
+		var id_navio = 'escolhaNavio'+tam
+
+		// label de confirmacao que o navio foi inserido
+		var label = document.createElement('label')
+		label.id = id_navio+'_confirmacao'
+		label.setAttribute('style', 'color:green')
+
+		// add o label na div
+		div.appendChild(label)
+
+		// criar o elemento label, que e o texto (rotulo) que aparece pro usuario
+		var label = document.createElement('label')
+		label.id = id_navio+'_nome'
+		label.setAttribute("for", 'escolhaNavio'+tam)
+		label.innerHTML = 'Navio ('+tam+' casas)'
+
+		// add o label na div
+		div.appendChild(label)
+
+		// add um pula linha na div
+		div.appendChild(document.createElement('br'))
+	})
+}
+
+function criarTabuleiroIA() {
 
 	// cria uma tabela que sera o tabuleiro
-	var tab = document.getElementById("tabuleiro1");
+	var tab = document.getElementById("tabuleiro_ia");
 	for (var i = 0; i < tamanho_tabuleiro; i++) {
 
 		// cria uma linha
@@ -26,7 +93,46 @@ function criarTabuleiro() {
 
 			// cria uma celula e faz id=posicao no tabuleiro
 			var celula = document.createElement("td");
-			celula.id = "cel:"+i+"-"+j;
+			celula.id = "ia_cel:"+i+"-"+j;
+
+			// insere uma imagem em cada celula
+			var img = document.createElement("img");
+
+			var coord = new Coordenada(i,j)
+			var navio = getNavioPelaPosicao(coord, lista_navios)
+			if(navio == null){
+				img.src = "./imagens/jogo_mar.png";
+				img.height = tamanho_casas_px;
+				img.className = "mar";
+			}else{
+				img.src = "./imagens/jogo_navio.png";
+				img.height = tamanho_casas_px;
+				img.className = "navio_jogador";
+			}
+
+			// add imagem na celula da tabela
+			celula.appendChild(img);
+			// add a celula na linha
+			linha.appendChild(celula);
+		};
+		// add a linha na tabela
+		tab.appendChild(linha);
+	};
+}
+
+function criarTabuleiroJogador() {
+
+	// cria uma tabela que sera o tabuleiro
+	var tab = document.getElementById("tabuleiro_jogador");
+	for (var i = 0; i < tamanho_tabuleiro; i++) {
+
+		// cria uma linha
+		var linha = document.createElement("tr");
+		for (var j = 0; j < tamanho_tabuleiro; j++) {
+
+			// cria uma celula e faz id=posicao no tabuleiro
+			var celula = document.createElement("td");
+			celula.id = "jog_cel:"+i+"-"+j;
 
 			// insere uma imagem em cada celula
 			// (no inicio todas as posicoes do tabuleiro sao mar)
@@ -118,7 +224,11 @@ function analizar_cookie () {
 		var orientacao = info_navio.replace(/.*orientacao:([^,]*).*/, '$1')
 
 		lista_navios.push(new Navio(casas, new Coordenada(parseInt(coordenadas[0]), parseInt(coordenadas[1])), orientacao))
+
+		lista_tam_navios.push(casas)
 	}
+
+	lista_tam_navios.sort()
 
 	console.log(lista_navios)
 }
