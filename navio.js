@@ -1,6 +1,6 @@
 function Navio(tamanho, coordenadas, orientacao){
 	this.tamanho = tamanho // inteiro
-	this.coordenadas = coordenadas // array de tamanho 2
+	this.coordenadas = coordenadas // objeto Coordenada
 	this.orientacao = orientacao // String
 	this.casasAtingidas = (new Array(this.tamanho)).fill(false) // array de booleanos indicando quais casas do navio forma atingidas
 

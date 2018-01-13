@@ -1,12 +1,19 @@
 
 var tamanho_tabuleiro = 10;
 var tamanho_casas_px = 30;
-var lista_navios = [];
+
+var lista_navios_jogador = []
+var lista_navios_ia = []
 
 var lista_tam_navios = []
 
 // procurar no cookie os navios adicionados pelo usuario
 analizar_cookie()
+
+// enquanto nao implementar a ia para posicionar os navios: copiar a lista de navios do jogador para lista de navios da ia
+lista_navios_jogador.forEach(function(navio, indice){
+	lista_navios_ia.push(new Navio(navio.tamanho, navio.coordenadas, navio.orientacao))
+})
 
 // mostra os cookies do navegador no console
 // (para ver o console aperte F12 no navegador e clique na aba console)
@@ -98,7 +105,7 @@ function criarTabuleiroIA() {
 			var img = document.createElement("img");
 
 			var coord = new Coordenada(i,j)
-			var navio = getNavioPelaPosicao(coord, lista_navios)
+			var navio = getNavioPelaPosicao(coord, lista_navios_jogador)
 			if(navio == null){
 				img.src = "./imagens/jogo_mar.png";
 				img.height = tamanho_casas_px;
@@ -156,6 +163,10 @@ function criarTabuleiroJogador() {
 
 function clique_casa() {
 
+	// se o jogador da vez é a ia, entao o usuario nao pode jogar
+	if(jogadorDaVez == "ia")
+		return;
+
 	// verificar se a casa em que ocorreu o evento ainda não foi descorberta
 	if(this.className != "mar"){
 		console.log(this.className)
@@ -168,44 +179,49 @@ function clique_casa() {
 	var linha = parseInt(coordenadas_cel[0]);
 	var coluna = parseInt(coordenadas_cel[1]);
 
-	var coord = new Coordenada(linha, coluna)
-	var navio = obter_navio(coord)
+	disparo_casa(linha, coluna, this)
+
+	jogadorDaVez = "ia"
+
+	ia_jogar()
+}
+
+function disparo_casa(coordX, coordY, casaElement){
+
+	var coord = new Coordenada(coordX, coordY)
+
+	if(jogadorDaVez == 'jogador')
+		var navio = getNavioPelaPosicao(coord, lista_navios_jogador)
+	else
+		var navio = getNavioPelaPosicao(coord, lista_navios_ia)
+
+	mostrarAviso('Ultima jogada: '+jogadorDaVez+' ('+(coordY+1)+','+(coordX+1)+')')
 	
 	if(navio == null){
 		// se não tiver um navio associado a essa casa então ecertou o mar
-		this.className = "acertou_mar"
-		this.src = "./imagens/jogo_acertou_mar.png";
+		casaElement.className = "acertou_mar"
+		casaElement.src = "./imagens/jogo_acertou_mar.png";
 		return
 	}
 
 	// se tiver um navio associado a essa casa entao acertou um navio
-	this.className = "acertou_navio"
-	this.src = "./imagens/jogo_acertou_navio.png";
+	casaElement.className = "acertou_navio"
+	casaElement.src = "./imagens/jogo_acertou_navio.png";
 
 	navio.atingiuCasa(coord)
 
 	if(navio.destruido()){
-		informarNavioDestruido(navio.tamanho, jogadorDaVez)
+		informarNavioDestruido(navio.tamanho)
 	}
 }
 
-function informarNavioDestruido(tam, jogador) {
-	var id_label = jogador+'_infoNavio'+tam+'_destruido'
-	document.getElementById(id_label).innerHTML = 'DESTRUIDO '
+function mostrarAviso(mensagem){
+	document.getElementById("aviso").innerHTML = mensagem;
 }
 
-function obter_navio(coord) {
-	// verifica se essa coordenada esta associada a algum navio e o retorna
-
-	var navioNaPosicao = null
-
-	lista_navios.forEach(function(navio){
-		if(navio.ocupaCasa(coord)){
-			navioNaPosicao = navio
-		}
-	})
-
-	return navioNaPosicao
+function informarNavioDestruido(tam) {
+	var id_label = jogadorDaVez+'_infoNavio'+tam+'_destruido'
+	document.getElementById(id_label).innerHTML = ' DESTRUIDO '
 }
 
 function analizar_cookie () {
@@ -226,12 +242,31 @@ function analizar_cookie () {
 		var coordenadas = info_navio.replace(/.*coordenadas:([^,]*).*/, '$1').split('-')
 		var orientacao = info_navio.replace(/.*orientacao:([^,]*).*/, '$1')
 
-		lista_navios.push(new Navio(casas, new Coordenada(parseInt(coordenadas[0]), parseInt(coordenadas[1])), orientacao))
+		lista_navios_jogador.push(new Navio(casas, new Coordenada(parseInt(coordenadas[0]), parseInt(coordenadas[1])), orientacao))
 
 		lista_tam_navios.push(casas)
 	}
 
 	lista_tam_navios.sort()
 
-	console.log(lista_navios)
+	console.log(lista_navios_jogador)
+}
+
+function ia_jogar() {
+	// ALEATORIO
+
+	var cel = null
+
+	while(cel == null || cel.className=='acertou_navio' || cel.className=='acertou_mar'){
+		var coordX = Math.floor(Math.random()*tamanho_tabuleiro)
+		var coordY = Math.floor(Math.random()*tamanho_tabuleiro)
+
+		var id_cel = "ia_cel:"+coordX+"-"+coordY
+		var cel = document.getElementById(id_cel).getElementsByTagName('img')[0]
+	}
+
+	console.log(coordX+','+coordY)
+	disparo_casa(coordX, coordY, cel)
+
+	jogadorDaVez = 'jogador'
 }
