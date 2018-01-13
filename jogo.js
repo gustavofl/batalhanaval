@@ -17,68 +17,67 @@ console.log(document.cookie);
 criarTabuleiroJogador();
 criarTabuleiroIA();
 
-mostrarTamanhos()
+mostrarInfoNavios()
 
-function mostrarTamanhos() {
-	// Cria as opcoes na pagina conforme os tamanhos na lista_tam_navios
+var jogadorDaVez = 'jogador'
 
-	// div onde ficam as opcoes
-	var div = document.getElementById('tamanhos_navio_jogador')
+function mostrarInfoNavios() {
 
-	// Para cada tamanho em lista_tam_navios
-	lista_tam_navios.forEach(function(tam, indice){ 
+	lista_tam_navios.forEach( inserir_infoNavios_jogador )
 
-		var id_navio = 'escolhaNavio'+tam
+	lista_tam_navios.forEach( inserir_infoNavios_ia )
+}
 
-		// criar o elemento label, que e o texto (rotulo) que aparece pro usuario
-		var label = document.createElement('label')
-		label.id = id_navio+'_nome'
-		label.setAttribute("for", 'escolhaNavio'+tam)
-		label.innerHTML = 'Navio ('+tam+' casas)'
+function inserir_infoNavios_jogador(tam, indice){
+	var div = document.getElementById('info_navios_jogador')
 
-		// add o label na div
-		div.appendChild(label)
+	var id_navio = 'jogador_infoNavio'+tam
 
-		// label de confirmacao que o navio foi inserido
-		var label = document.createElement('label')
-		label.id = id_navio+'_confirmacao'
-		label.setAttribute('style', 'color:green')
+	// label de confirmacao que o navio foi inserido
+	var label = document.createElement('label')
+	label.id = id_navio+'_destruido'
+	label.setAttribute('style', 'color:green')
 
-		// add o label na div
-		div.appendChild(label)
+	// add o label na div
+	div.appendChild(label)
 
-		// add um pula linha na div
-		div.appendChild(document.createElement('br'))
-	})
+	// criar o elemento label, que e o texto (rotulo) que aparece pro usuario
+	var label = document.createElement('label')
+	label.id = id_navio+'_nome'
+	label.setAttribute("for", 'jogador_infoNavio'+tam)
+	label.innerHTML = 'Navio ('+tam+' casas)'
 
-	// div onde ficam as opcoes
-	var div = document.getElementById('tamanhos_navio_ia')
+	// add o label na div
+	div.appendChild(label)
 
-	// Para cada tamanho em lista_tam_navios
-	lista_tam_navios.forEach(function(tam, indice){ 
+	// add um pula linha na div
+	div.appendChild(document.createElement('br'))
+}
 
-		var id_navio = 'escolhaNavio'+tam
+function inserir_infoNavios_ia(tam, indice){
+	var div = document.getElementById('info_navios_ia')
 
-		// label de confirmacao que o navio foi inserido
-		var label = document.createElement('label')
-		label.id = id_navio+'_confirmacao'
-		label.setAttribute('style', 'color:green')
+	var id_navio = 'ia_infoNavio'+tam
 
-		// add o label na div
-		div.appendChild(label)
+	// criar o elemento label, que e o texto (rotulo) que aparece pro usuario
+	var label = document.createElement('label')
+	label.id = id_navio+'_nome'
+	label.setAttribute("for", 'ia_infoNavio'+tam)
+	label.innerHTML = 'Navio ('+tam+' casas)'
 
-		// criar o elemento label, que e o texto (rotulo) que aparece pro usuario
-		var label = document.createElement('label')
-		label.id = id_navio+'_nome'
-		label.setAttribute("for", 'escolhaNavio'+tam)
-		label.innerHTML = 'Navio ('+tam+' casas)'
+	// add o label na div
+	div.appendChild(label)
 
-		// add o label na div
-		div.appendChild(label)
+	// label de confirmacao que o navio foi inserido
+	var label = document.createElement('label')
+	label.id = id_navio+'_destruido'
+	label.setAttribute('style', 'color:red')
 
-		// add um pula linha na div
-		div.appendChild(document.createElement('br'))
-	})
+	// add o label na div
+	div.appendChild(label)
+
+	// add um pula linha na div
+	div.appendChild(document.createElement('br'))
 }
 
 function criarTabuleiroIA() {
@@ -186,9 +185,13 @@ function clique_casa() {
 	navio.atingiuCasa(coord)
 
 	if(navio.destruido()){
-		// mostrar para o usuario
-		console.log("navio destruido")
+		informarNavioDestruido(navio.tamanho, jogadorDaVez)
 	}
+}
+
+function informarNavioDestruido(tam, jogador) {
+	var id_label = jogador+'_infoNavio'+tam+'_destruido'
+	document.getElementById(id_label).innerHTML = 'DESTRUIDO '
 }
 
 function obter_navio(coord) {
