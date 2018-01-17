@@ -181,8 +181,6 @@ function clique_casa() {
 
 	disparo_casa(linha, coluna, this)
 
-	jogadorDaVez = "ia"
-
 	ia_jogar()
 }
 
@@ -201,7 +199,9 @@ function disparo_casa(coordX, coordY, casaElement){
 		// se não tiver um navio associado a essa casa então ecertou o mar
 		casaElement.className = "acertou_mar"
 		casaElement.src = "./imagens/jogo_acertou_mar.png";
-		return
+
+		alternarJogador()
+		return false
 	}
 
 	// se tiver um navio associado a essa casa entao acertou um navio
@@ -213,6 +213,15 @@ function disparo_casa(coordX, coordY, casaElement){
 	if(navio.destruido()){
 		informarNavioDestruido(navio.tamanho)
 	}
+
+	return true
+}
+
+function alternarJogador() {
+	if(jogadorDaVez == 'ia')
+		jogadorDaVez = 'jogador'
+	else
+		jogadorDaVez = 'ia'
 }
 
 function mostrarAviso(mensagem){
@@ -252,8 +261,11 @@ function analizar_cookie () {
 	console.log(lista_navios_jogador)
 }
 
-function ia_jogar() {
+async function ia_jogar() {
 	// ALEATORIO
+
+	if(jogadorDaVez == 'jogador')
+		return;
 
 	var cel = null
 
@@ -266,7 +278,15 @@ function ia_jogar() {
 	}
 
 	console.log(coordX+','+coordY)
-	disparo_casa(coordX, coordY, cel)
+	var acertou_navio = disparo_casa(coordX, coordY, cel)
 
-	jogadorDaVez = 'jogador'
+	if(acertou_navio){
+		await sleep(1500);
+		
+		ia_jogar()
+	}
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
