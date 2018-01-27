@@ -5,10 +5,45 @@
         <meta charset="utf-8">
     </head>
     <body>
+        <center>
+            <table>
+            <tr>
+                <td>
+                    <div id="info_navios_jogador" style="text-align: right">
+                        <p style="color: white">DESTRUIDO Navio (5 casas) </p>
+                    </div>
+                </td>
 
-        <h2>Jogador 1</h2>
-        
-		<table border="1" id="tabuleiro1"></table>
+                <td>
+                    <center>
+                        <h2>Jogador</h2>
+                    </center>
+
+                    <table border="1" id="tabuleiro_jogador"></table>
+                </td>
+
+                <td>
+                    <h1>X</h1>
+                </td>
+
+                <td>
+                    <center>
+                        <h2>IA</h2>
+                    </center>
+
+                    <table border="1" id="tabuleiro_ia"></table>
+                </td>
+
+                <td>
+                    <div id="info_navios_ia">
+                        <p style="color: white">DESTRUIDO Navio (5 casas) </p>
+                    </div>
+                </td>
+            </tr>
+            </table>
+
+            <h4 id="aviso" style="color:red;"></h4>
+        </center>
 		
         <script type="text/javascript" src="navio.js"></script>
         <script type="text/javascript" src="jogo.js"></script>
