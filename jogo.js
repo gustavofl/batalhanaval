@@ -1,7 +1,7 @@
 
 var tamanho_tabuleiro = 10;
 var tamanho_casas_px = 30;
-var lista_jogadas = [] 
+var lista_jogadas = []
 
 var lista_navios_jogador = []
 var lista_navios_ia = []
@@ -27,15 +27,17 @@ criarTabuleiroIA();
 
 mostrarInfoNavios()
 
+var jogadorDaVez = 'ia'
+alternarJogador()
+
+/*
 coordX = 3
 coordY = 9
 jogadorDaVez = 'ia'
 var id_cel = "ia_cel:"+coordX+"-"+coordY
 var cel = document.getElementById(id_cel).getElementsByTagName('img')[0]
 disparo_casa(coordX, coordY, cel)
-
-
-var jogadorDaVez = 'jogador'
+*/
 
 function mostrarInfoNavios() {
 
@@ -190,9 +192,48 @@ function clique_casa() {
 
 	disparo_casa(linha, coluna, this)
 
-	jogadorDaVez = "ia"
-
 	ia_jogar()
+}
+
+function disparo_casa_master(coordX, coordY, casaElement){
+
+	var coord = new Coordenada(coordX, coordY)
+
+	if(jogadorDaVez == 'jogador')
+		var navio = getNavioPelaPosicao(coord, lista_navios_jogador)
+	else
+		var navio = getNavioPelaPosicao(coord, lista_navios_ia)
+
+	mostrarAviso('Ultima jogada: '+jogadorDaVez+' ('+(coordY+1)+','+(coordX+1)+')')
+	
+	if(navio == null){
+		// se não tiver um navio associado a essa casa então ecertou o mar
+		casaElement.className = "acertou_mar"
+		casaElement.src = "./imagens/jogo_acertou_mar.png";
+
+		alternarJogador()
+		return false
+	}
+
+	// se tiver um navio associado a essa casa entao acertou um navio
+	casaElement.className = "acertou_navio"
+	casaElement.src = "./imagens/jogo_acertou_navio.png";
+
+	if(navio.destruido()){
+		informarNavioDestruido(navio.tamanho)
+	}
+
+	return true
+}
+
+function alternarJogador() {
+
+	if(jogadorDaVez == 'ia')
+		jogadorDaVez = 'jogador'
+	else
+		jogadorDaVez = 'ia'
+
+	document.getElementById('jogadorDaVez').innerHTML = 'Jogador da vez: ' + jogadorDaVez
 }
 
 function mostrarAviso(mensagem){
@@ -232,8 +273,6 @@ function analizar_cookie () {
 	console.log(lista_navios_jogador)
 }
 
-
-
 /*      //////////////       REGRAS DA IA     ///////////////// 
 
 0- Basicamente, a IA tem um vetor de jogadas possiveis, comeca com todas as casas e vai se restrigindo conforme o jogo flui
@@ -249,12 +288,15 @@ function analizar_cookie () {
 */
 
 
-function ia_jogar() {
+async function ia_jogar() {
 	// ALEATORIO
+
+	if(jogadorDaVez == 'jogador')
+		return;
 	
 	var cel = null
 
-	while(cel == null || cel.className=='acertou_navio' || cel.className=='acertou_mar'){
+	while(cel == null || cel.className=='acertou_navio' || cel.className=='acertou_mar' ){
 
 
 		// se nao tiver acertado nada joga RANDOM *por enquanto
@@ -277,14 +319,22 @@ function ia_jogar() {
 	}
 
 	console.log(coordX+','+coordY)
-	disparo_casa(coordX, coordY, cel)
+	var acertou_navio = disparo_casa(coordX, coordY, cel)
 
 	// print das casas que ira randomizar e escolher a proxima jogada
 	for(let k = 0; k < lista_jogadas.length; k++ ){
 		console.log(lista_jogadas[k].x + ", " + lista_jogadas[k].y + " possiveis ")
 	}
 
-	jogadorDaVez = 'jogador'
+	if(acertou_navio){
+		await sleep(900);
+		
+		ia_jogar()
+	}
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function disparo_casa(coordX, coordY, casaElement){
@@ -303,12 +353,14 @@ function disparo_casa(coordX, coordY, casaElement){
 		casaElement.className = "acertou_mar"
 		casaElement.src = "./imagens/jogo_acertou_mar.png"
 
+		alternarJogador()
+
 		// Caso em que, foi encerrado uma reta de acertos em navios e nao existia um navio, portanto a lista esta vazia, mas existem navios pendentes
 		if(lista_jogadas.length == 0){
 			checaNaviosPendentes()
 
 		}
-		return
+		return false
 	
 	}
 	
@@ -353,6 +405,8 @@ function disparo_casa(coordX, coordY, casaElement){
 			
 		}
 	}
+
+	return true
 }
 
 ////////////////////////// FUNCOES DA IA //////////////////////// 
@@ -606,5 +660,4 @@ function preencheAdjacentes(coord){
 		coord4 = new Coordenada(coord.x, coord.y +1)
 		lista_jogadas.push(coord4)
 	}
-
 }
