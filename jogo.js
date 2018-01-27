@@ -28,7 +28,7 @@ criarTabuleiroIA();
 mostrarInfoNavios()
 
 coordX = 3
-coordY = 0
+coordY = 9
 jogadorDaVez = 'ia'
 var id_cel = "ia_cel:"+coordX+"-"+coordY
 var cel = document.getElementById(id_cel).getElementsByTagName('img')[0]
@@ -232,6 +232,23 @@ function analizar_cookie () {
 	console.log(lista_navios_jogador)
 }
 
+
+
+/*      //////////////       REGRAS DA IA     ///////////////// 
+
+0- Basicamente, a IA tem um vetor de jogadas possiveis, comeca com todas as casas e vai se restrigindo conforme o jogo flui
+1- Ao acertar um Navio, a IA limita as proximas jogadas para os seus arredores possiveis
+2- Ao acertar uma segunda casa de um possivel navio, o limite eh mudado para apenas as casas que completariam esse possivel navio
+2.1 Se o Navio nao foi completado, quer dizer que eram navios adjacentes, e agora limita as jogadas para o passo 1, a partir de uma casa de navio acertada
+2.2 Se o navio foi completado, checa se ha alguma casa acertada pendente, se sim, retorna ao passo 1
+3- Ao terminar os Navios achados, a IA define o vetor de possiveis jogadas como as casas em que os navios restantes ainda cabem, e atira ate voltar ao passo 1 *
+
+
+*Ainda nao implementado
+
+*/
+
+
 function ia_jogar() {
 	// ALEATORIO
 	
@@ -243,21 +260,16 @@ function ia_jogar() {
 		// se nao tiver acertado nada joga RANDOM *por enquanto
 		if(lista_jogadas.length == 0){
 
-
-
 			var coordX = Math.floor(Math.random()*tamanho_tabuleiro)
 			var coordY = Math.floor(Math.random()*tamanho_tabuleiro)
 			var id_cel = "ia_cel:"+coordX+"-"+coordY
 			var cel = document.getElementById(id_cel).getElementsByTagName('img')[0]
 		}// se tiver acertado um navio, joga entre as possiveis casas
 		else{
-			console.log(lista_jogadas.length)
 			var indice_jogada = Math.floor(Math.random()*(lista_jogadas.length))
 			var coordX = lista_jogadas[indice_jogada].x
 			var coordY = lista_jogadas[indice_jogada].y
-
 			lista_jogadas.splice(indice_jogada, 1)
-
 			
 			var id_cel = "ia_cel:"+coordX+"-"+coordY
 			var cel = document.getElementById(id_cel).getElementsByTagName('img')[0]
@@ -267,6 +279,7 @@ function ia_jogar() {
 	console.log(coordX+','+coordY)
 	disparo_casa(coordX, coordY, cel)
 
+	// print das casas que ira randomizar e escolher a proxima jogada
 	for(let k = 0; k < lista_jogadas.length; k++ ){
 		console.log(lista_jogadas[k].x + ", " + lista_jogadas[k].y + " possiveis ")
 	}
@@ -275,18 +288,7 @@ function ia_jogar() {
 }
 
 function disparo_casa(coordX, coordY, casaElement){
-	/*
-	for (var k = 0; k <= 9; k++){
-		for(i = 0; i <= 9; i++){
-			var id_cel = "ia_cel:"+k+""+i
-			var cel = document.getElementsByid(id_cel).getElementsByTagName('img')[0]
-			console.log( cel.className)
-		}
-	}*/
 
-
-	
-	
 	var coord = new Coordenada(coordX, coordY)
 
 	if(jogadorDaVez == 'jogador')
@@ -300,42 +302,14 @@ function disparo_casa(coordX, coordY, casaElement){
 		// se não tiver um navio associado a essa casa então ecertou o mar
 		casaElement.className = "acertou_mar"
 		casaElement.src = "./imagens/jogo_acertou_mar.png"
-		
+
+		// Caso em que, foi encerrado uma reta de acertos em navios e nao existia um navio, portanto a lista esta vazia, mas existem navios pendentes
 		if(lista_jogadas.length == 0){
-			for(let k = 0; k < lista_navios_ia.length; k++){
-				var count = 0
-				var indice = 0
-				for(let i = 0; i < lista_navios_ia[k].casasAtingidas.length; i++){
-					if(lista_navios_ia[k].casasAtingidas[i] == true){
-						indice = i
-						count++
-					}
-				}
-				
-				var navio_casas = lista_navios_ia[k].casas()
-				if(count == 1){
-					if(navio_casas[indice].x - 1 >= 0){
-						coord1 = new Coordenada(navio_casas[indice].x -1, navio_casas[indice].y)
-						lista_jogadas.push(coord1)
-					}
-					if(navio_casas[indice].y - 1 >= 0){
-						coord2 = new Coordenada(navio_casas[indice].x, navio_casas[indice].y -1)
-						lista_jogadas.push(coord2)
-					}
-					if(navio_casas[indice].x +1 <= 9){
-						coord3 = new Coordenada(navio_casas[indice].x +1, navio_casas[indice].y)
-						lista_jogadas.push(coord3)
-					}
-					if(navio_casas[indice].y +1 <= 9){
-						coord4 = new Coordenada(navio_casas[indice].x, navio_casas[indice].y +1)
-						lista_jogadas.push(coord4)
-					}
-					return
-				}
-			}
+			checaNaviosPendentes()
+
 		}
-		
 		return
+	
 	}
 	
 	// se tiver um navio associado a essa casa entao acertou um navio
@@ -359,250 +333,278 @@ function disparo_casa(coordX, coordY, casaElement){
 		
 		if (count == 1){//Se apenas 1 foi atingida, retorna uma lista das opções dos valores Viáveis ao redor da casa atingida ( em cruz))
 			
-			//Casso existam navios diferentes adjacente, para a IA nao ter vantagem
+			//Caso existam navios diferentes adjacente, para a IA nao ter vantagem, se sim, preenche com as jogadas considerando como se fosse um navio
 			
-			if(coord.x - 1 >= 0 ){
-				lista_jogadas = []
-				var id_cel1 = "ia_cel:"+(coord.x-1)+"-"+coord.y
-				var cel1 = document.getElementById(id_cel1).getElementsByTagName('img')[0]
-				if(cel1.className == 'acertou_navio'){
-					var coordenada = new Coordenada(coord.x-1, coord.y)
-					console.log("entra11")
-					var navio2 = getNavioPelaPosicao(coordenada, lista_navios_ia)
-					if(!navio2.destruido()){
-						console.log("entra1")
-						if(coord.x+1 <= 9){
-							var coord1 = new Coordenada(coord.x+1, coord.y)
-							lista_jogadas.push(coord1)
-						}
-						for(let k = coord.x; k > 0; k--){
-							var coordenada = new Coordenada(k-1, coord.y)
-							var navio2 = getNavioPelaPosicao(coordenada, lista_navios_ia)
-							var id_cel1 = "ia_cel:"+(k-1)+"-"+coord.y
-							var cel1 = document.getElementById(id_cel1).getElementsByTagName('img')[0]
-							
-							if(cel1.className == 'acertou_navio' && navio2.destruido()){
-								return
-							}else if(cel1.className != 'acertou_navio'){
-								var coord2 = new Coordenada(k-1, coord.y)
-								lista_jogadas.push(coord2)
-								break
-							}
-						}
-					return
-					}
-				}
+			existe = checaNaviosAoRedor(coord)
+			
+			if(!existe){
+			//caso nao tenha achado navios ao lado, preenche com as possiveis casas ao lado
 
-			}if(coord.x +1 <= 9){
-				lista_jogadas = []
-				var id_cel2 = "ia_cel:"+(coord.x+1)+"-"+coord.y
-				var cel2 = document.getElementById(id_cel2).getElementsByTagName('img')[0]
-				if(cel2.className == 'acertou_navio'){
-					console.log("entra22")
-					var coordenada =new Coordenada(coord.x+1, coord.y)
-					var navio2 = getNavioPelaPosicao(coordenada, lista_navios_ia)
-					if(!navio2.destruido()){
-						console.log("entra2")
-						if(coord.x -1>=0){
-							var coord1 = new Coordenada(coord.x-1, coord.y)
-							console.log(coord1.x + " " + (coord1.y)+ " a 1 ")
-							lista_jogadas.push(coord1)
-						}
-						for(let k = coord.x; k < 9; k++){
-							var coordenada = new Coordenada(k+1, coord.y)
-							var navio2 = getNavioPelaPosicao(coordenada, lista_navios_ia)
-							var id_cel2 = "ia_cel:"+(k+1)+"-"+coord.y
-							var cel2 = document.getElementById(id_cel2).getElementsByTagName('img')[0]
-							
-							if(cel2.className == 'acertou_navio' && navio2.destruido()){
-								return
-							}else if(cel2.className !='acertou_navio'){
-								var coord2 = new Coordenada(k+1, coord.y)
-								lista_jogadas.push(coord2)
-								console.log(coord2.x + " " + (coord2.y)+ " a 2 ")
+				preencheAdjacentes(coord)
 
-								break
-							}
-						}
-					return
-					}
-				}				
-			}if(coord.y-1 >= 0){
-				lista_jogadas = []
-				var id_cel3 = "ia_cel:"+coord.x+"-"+(coord.y-1)
-				var cel3 = document.getElementById(id_cel3).getElementsByTagName('img')[0]
-				if(cel3.className == 'acertou_navio'){
-					console.log("entra33")
-					var coordenada = new Coordenada(coord.x, coord.y-1)
-					var navio2 = getNavioPelaPosicao(coordenada, lista_navios_ia)
-					if(!navio2.destruido()){
-						console.log("entra3")
-						if(coord.y +1 <= 9){
-							var coord1 = new Coordenada(coord.x, coord.y+1)
-							lista_jogadas.push(coord1)
-						}
-						for(let k = coord.y; k > 0; k--){
-							var coordenada = new Coordenada(coord.x, k-1)
-							var navio2 = getNavioPelaPosicao(coordenada, lista_navios_ia)
-							var id_cel3 = "ia_cel:"+coord.x+"-"+(k-1)
-							var cel3 = document.getElementById(id_cel3).getElementsByTagName('img')[0]
-							
-							if(cel3.className == 'acertou_navio' && navio2.destruido()){
-								return
-							}else if(cel3.className !='acertou_navio'){
-								var coord2 = new Coordenada( coord.x, k-1)
-								lista_jogadas.push(coord2)
-								break
-							}
-						}
-					return
-					}
-				}
-			
-			}if(coord.y +1 <= 9){
-				lista_jogadas = []
-				var id_cel4 = "ia_cel:"+coord.x+"-"+(coord.y+1)
-				var cel4 = document.getElementById(id_cel4).getElementsByTagName('img')[0]
-				if(cel4.className == 'acertou_navio'){
-					console.log("entra44")
-					var coordenada = new Coordenada(coord.x, coord.y+1)
-					var navio2 = getNavioPelaPosicao(coordenada, lista_navios_ia)
-					if(!navio2.destruido()){
-						console.log("entra4")
-						if(coord.y -1 >= 0){
-							coord1 = new Coordenada(coord.x, coord.y -1)
-							lista_jogadas.push(coord1)
-						}
-						for(let k = coord.y; k < 9; k++){
-							var coordenada = new Coordenada(coord.x, k+1)
-							var navio2 = getNavioPelaPosicao(coordenada, lista_navios_ia)
-							var id_cel4 = "ia_cel:"+coord.x+"-"+(k+1)
-							var cel4 = document.getElementById(id_cel4).getElementsByTagName('img')[0]
-										
-							if(cel4.className == 'acertou_navio' && navio2.destruido()){
-								return
-							}else if(cel4.className !='acertou_navio'){
-								var coord2 = new Coordenada( coord.x, k+1)
-								lista_jogadas.push(coord2)
-								break
-							}
-						}
-					return
-					}
-				}
 			}
-			
-			//caso nao tenha achado navios ao lado
 
-			if(coord.x - 1 >= 0){	
-				coord1 = new Coordenada(coord.x -1, coord.y)
-				lista_jogadas.push(coord1)
-				
-			}
-			if(coord.y - 1 >= 0){
-				coord2 = new Coordenada(coord.x, coord.y -1)
-				lista_jogadas.push(coord2)
-			}
-			if(coord.x +1 <= 9){
-				coord3 = new Coordenada(coord.x +1, coord.y)
-				lista_jogadas.push(coord3)
-			}
-			if(coord.y +1 <= 9){
-				coord4 = new Coordenada(coord.x, coord.y +1)
-				lista_jogadas.push(coord4)
-			}
-			
 		}else if(count != navio.casasAtingidas.length){// se tiver acertado mais de uma casa do navio, já se sabe a orientacao, portanto, diminui as possibilidades
 			
-			lista_jogadas = []
-			var min_x = 10
-			var max_x = 0
-			var min_y = 10
-			var max_y = 0
-			var coord_x = 0
-			var coord_y = 0
-			if(navio.orientacao == 'vertical'){
-				var navio_casas = navio.casas()
-				for(let k = 0; k < navio_casas.length; k++){
-					coord_x = navio_casas[k].x
-					if(navio.casasAtingidas[k] == true){
-						if(navio_casas[k].y < min_y){
-							min_y = navio_casas[k].y
-						}else if(navio_casas[k].y > max_y){
-							max_y = navio_casas[k].y
-						}
-					}
-				}
-				
-				if(max_y +1 <= 9){
-					coord1 = new Coordenada(coord_x, max_y +1)
-					lista_jogadas.push(coord1)
-				}
-				if(min_y -1 >= 0){
-					coord2 = new Coordenada(coord_x, min_y -1)
-					lista_jogadas.push(coord2)
-				}
-			}else{
-				var navio_casas = navio.casas()
-				for(let k = 0; k < navio_casas.length; k++){
-					console.log(navio_casas[k].x + ", " + navio_casas[k].y + " entrou ")
-					coord_y = navio_casas[k].y
-					if(navio.casasAtingidas[k] == true){
-						if(navio_casas[k].x < min_x){
-							min_x = navio_casas[k].x
-						}else if(navio_casas[k].x > max_x){
-							max_x = navio_casas[k].x
-						}
-					}
-				}
-				
-				if(max_x +1 <= 9){
-					coord1 = new Coordenada(max_x +1, coord_y)
-					lista_jogadas.push(coord1)
-				}
-				if(min_x -1 >= 0){
-					coord2 = new Coordenada(min_x -1, coord_y)
-					lista_jogadas.push(coord2)
-				}
-			}
-			
-			
+			completaNavio(navio)
 			
 		}else{//Ao terminar um navio, checa se ja achou vestigios de algum outro, caso contrario, retorna uma lista vazia e volta ao random
-			
-			lista_jogadas = []
-			for(let k = 0; k < lista_navios_ia.length; k++){
-				var count = 0
-				var indice = 0
-				for(let i = 0; i < lista_navios_ia[k].casasAtingidas.length; i++){
-					if(lista_navios_ia[k].casasAtingidas[i] == true){
-						indice = i
-						count++
-					}
-				}
-
-				var navio_casas = lista_navios_ia[k].casas()
-				if(count == 1){
-					if(navio_casas[indice].x - 1 >= 0){
-						coord1 = new Coordenada(navio_casas[indice].x -1, navio_casas[indice].y)
-						lista_jogadas.push(coord1)
-					}
-					if(navio_casas[indice].y - 1 >= 0){
-						coord2 = new Coordenada(navio_casas[indice].x, navio_casas[indice].y -1)
-						lista_jogadas.push(coord2)
-					}
-					if(navio_casas[indice].x +1 <= 9){
-						coord3 = new Coordenada(navio_casas[indice].x +1, navio_casas[indice].y)
-						lista_jogadas.push(coord3)
-					}
-					if(navio_casas[indice].y +1 <= 9){
-						coord4 = new Coordenada(navio_casas[indice].x, navio_casas[indice].y +1)
-						lista_jogadas.push(coord4)
-					}
-				return
-				}
-			}
+			checaNaviosPendentes()
 			
 		}
 	}
+}
+
+////////////////////////// FUNCOES DA IA //////////////////////// 
+
+function checaNaviosPendentes(){
+	lista_jogadas = []
+	for(let k = 0; k < lista_navios_ia.length; k++){
+		var count = 0
+		var indice = 0
+
+		for(let i = 0; i < lista_navios_ia[k].casasAtingidas.length; i++){
+			if(lista_navios_ia[k].casasAtingidas[i] == true){
+				indice = i
+				count++
+			}
+		}
+				
+		var navio_casas = lista_navios_ia[k].casas()
+		if(count == 1){
+			if(navio_casas[indice].x - 1 >= 0){
+				coord1 = new Coordenada(navio_casas[indice].x -1, navio_casas[indice].y)
+				lista_jogadas.push(coord1)
+			}
+			if(navio_casas[indice].y - 1 >= 0){
+				coord2 = new Coordenada(navio_casas[indice].x, navio_casas[indice].y -1)
+				lista_jogadas.push(coord2)
+			}
+			if(navio_casas[indice].x +1 <= 9){
+				coord3 = new Coordenada(navio_casas[indice].x +1, navio_casas[indice].y)
+				lista_jogadas.push(coord3)
+			}
+			if(navio_casas[indice].y +1 <= 9){
+				coord4 = new Coordenada(navio_casas[indice].x, navio_casas[indice].y +1)
+				lista_jogadas.push(coord4)
+			}
+			return
+		}
+	}
+}
+
+function completaNavio(navio){
+	lista_jogadas = []
+	var min_x = 10
+	var max_x = 0
+	var min_y = 10
+	var max_y = 0
+	var coord_x = 0
+	var coord_y = 0
+	if(navio.orientacao == 'vertical'){
+		var navio_casas = navio.casas()
+		for(let k = 0; k < navio_casas.length; k++){
+			coord_x = navio_casas[k].x
+			if(navio.casasAtingidas[k] == true){
+				if(navio_casas[k].y < min_y){
+					min_y = navio_casas[k].y
+				}else if(navio_casas[k].y > max_y){
+					max_y = navio_casas[k].y
+				}
+			}
+		}
+		
+		if(max_y +1 <= 9){
+			coord1 = new Coordenada(coord_x, max_y +1)
+			lista_jogadas.push(coord1)
+		}
+		if(min_y -1 >= 0){
+			coord2 = new Coordenada(coord_x, min_y -1)
+			lista_jogadas.push(coord2)
+		}
+	}else{
+		var navio_casas = navio.casas()
+		for(let k = 0; k < navio_casas.length; k++){
+			coord_y = navio_casas[k].y
+			if(navio.casasAtingidas[k] == true){
+				if(navio_casas[k].x < min_x){
+					min_x = navio_casas[k].x
+				}else if(navio_casas[k].x > max_x){
+					max_x = navio_casas[k].x
+				}
+			}
+		}
+		
+		if(max_x +1 <= 9){
+			coord1 = new Coordenada(max_x +1, coord_y)
+			lista_jogadas.push(coord1)
+		}
+		if(min_x -1 >= 0){
+			coord2 = new Coordenada(min_x -1, coord_y)
+			lista_jogadas.push(coord2)
+		}
+	}
+}
+
+function checaNaviosAoRedor(coord){
+
+	// cada if checa se a casa adjacente ja foi acertada e possui um navio, se sim, limita para os lados como uma pessoa faria, achando que teria um navio ali
+
+
+	if(coord.x - 1 >= 0 ){
+		lista_jogadas = []
+		var id_cel1 = "ia_cel:"+(coord.x-1)+"-"+coord.y
+		var cel1 = document.getElementById(id_cel1).getElementsByTagName('img')[0]
+		if(cel1.className == 'acertou_navio'){
+			var coordenada = new Coordenada(coord.x-1, coord.y)
+			console.log("entra11")
+			var navio2 = getNavioPelaPosicao(coordenada, lista_navios_ia)
+			if(!navio2.destruido()){
+				console.log("entra1")
+				if(coord.x+1 <= 9){
+					var coord1 = new Coordenada(coord.x+1, coord.y)
+					lista_jogadas.push(coord1)
+				}
+				for(let k = coord.x; k > 0; k--){
+					var coordenada = new Coordenada(k-1, coord.y)
+					var navio2 = getNavioPelaPosicao(coordenada, lista_navios_ia)
+					var id_cel1 = "ia_cel:"+(k-1)+"-"+coord.y
+					var cel1 = document.getElementById(id_cel1).getElementsByTagName('img')[0]
+					
+					if(cel1.className == 'acertou_navio' && navio2.destruido()){
+						return true
+					}else if(cel1.className != 'acertou_navio'){
+						var coord2 = new Coordenada(k-1, coord.y)
+						lista_jogadas.push(coord2)
+						break
+					}
+				}
+				return true
+			}
+		}
+	}
+
+	if(coord.x +1 <= 9){
+		lista_jogadas = []
+		var id_cel2 = "ia_cel:"+(coord.x+1)+"-"+coord.y
+		var cel2 = document.getElementById(id_cel2).getElementsByTagName('img')[0]
+		if(cel2.className == 'acertou_navio'){
+			console.log("entra22")
+			var coordenada =new Coordenada(coord.x+1, coord.y)
+			var navio2 = getNavioPelaPosicao(coordenada, lista_navios_ia)
+			if(!navio2.destruido()){
+				console.log("entra2")
+				if(coord.x -1>=0){
+					var coord1 = new Coordenada(coord.x-1, coord.y)
+					lista_jogadas.push(coord1)
+				}
+				for(let k = coord.x; k < 9; k++){
+					var coordenada = new Coordenada(k+1, coord.y)
+					var navio2 = getNavioPelaPosicao(coordenada, lista_navios_ia)
+					var id_cel2 = "ia_cel:"+(k+1)+"-"+coord.y
+					var cel2 = document.getElementById(id_cel2).getElementsByTagName('img')[0]
+					
+					if(cel2.className == 'acertou_navio' && navio2.destruido()){
+						return true
+						}else if(cel2.className !='acertou_navio'){
+						var coord2 = new Coordenada(k+1, coord.y)
+						lista_jogadas.push(coord2)
+						console.log(coord2.x + " " + (coord2.y)+ " a 2 ")
+
+						break
+					}
+				}
+			return true
+			}
+		}				
+	}
+
+	if(coord.y-1 >= 0){
+		lista_jogadas = []
+		var id_cel3 = "ia_cel:"+coord.x+"-"+(coord.y-1)
+		var cel3 = document.getElementById(id_cel3).getElementsByTagName('img')[0]
+		if(cel3.className == 'acertou_navio'){
+			console.log("entra33")
+			var coordenada = new Coordenada(coord.x, coord.y-1)
+			var navio2 = getNavioPelaPosicao(coordenada, lista_navios_ia)
+			if(!navio2.destruido()){
+				console.log("entra3")
+				if(coord.y +1 <= 9){
+					var coord1 = new Coordenada(coord.x, coord.y+1)
+					lista_jogadas.push(coord1)
+				}
+				for(let k = coord.y; k > 0; k--){
+					var coordenada = new Coordenada(coord.x, k-1)
+					var navio2 = getNavioPelaPosicao(coordenada, lista_navios_ia)
+					var id_cel3 = "ia_cel:"+coord.x+"-"+(k-1)
+					var cel3 = document.getElementById(id_cel3).getElementsByTagName('img')[0]
+					
+					if(cel3.className == 'acertou_navio' && navio2.destruido()){
+						return true
+					}else if(cel3.className !='acertou_navio'){
+						var coord2 = new Coordenada( coord.x, k-1)
+						lista_jogadas.push(coord2)
+						break
+					}
+				}
+			return true
+			}
+		}
+	
+	}
+
+	if(coord.y +1 <= 9){ 
+		lista_jogadas = []
+		var id_cel4 = "ia_cel:"+coord.x+"-"+(coord.y+1)
+		var cel4 = document.getElementById(id_cel4).getElementsByTagName('img')[0]
+		if(cel4.className == 'acertou_navio'){
+			console.log("entra44")
+			var coordenada = new Coordenada(coord.x, coord.y+1)
+			var navio2 = getNavioPelaPosicao(coordenada, lista_navios_ia)
+			if(!navio2.destruido()){
+				console.log("entra4")
+				if(coord.y -1 >= 0){
+					coord1 = new Coordenada(coord.x, coord.y -1)
+					lista_jogadas.push(coord1)
+				}
+				for(let k = coord.y; k < 9; k++){
+					var coordenada = new Coordenada(coord.x, k+1)
+					var navio2 = getNavioPelaPosicao(coordenada, lista_navios_ia)
+					var id_cel4 = "ia_cel:"+coord.x+"-"+(k+1)
+					var cel4 = document.getElementById(id_cel4).getElementsByTagName('img')[0]
+								
+					if(cel4.className == 'acertou_navio' && navio2.destruido()){
+						return true
+					}else if(cel4.className !='acertou_navio'){
+						var coord2 = new Coordenada( coord.x, k+1)
+						lista_jogadas.push(coord2)
+						break
+					}
+				}
+			return true
+			}
+		}
+	}
+}
+
+function preencheAdjacentes(coord){	
+
+	if(coord.x - 1 >= 0){	
+		coord1 = new Coordenada(coord.x -1, coord.y)
+		lista_jogadas.push(coord1)
+		
+	}
+	if(coord.y - 1 >= 0){
+		coord2 = new Coordenada(coord.x, coord.y -1)
+		lista_jogadas.push(coord2)
+	}
+	if(coord.x +1 <= 9){
+		coord3 = new Coordenada(coord.x +1, coord.y)
+		lista_jogadas.push(coord3)
+	}
+	if(coord.y +1 <= 9){
+		coord4 = new Coordenada(coord.x, coord.y +1)
+		lista_jogadas.push(coord4)
+	}
+
 }
