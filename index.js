@@ -3,7 +3,8 @@ var tamanho_tabuleiro = 10;
 var tamanho_casas_px = 30;
 var orientacao = 'vertical'
 
-var lista_tam_navios = [ 2, 3, 4, 5, 7 ]
+var lista_tam_navios = [ 2, 2, 3, 4, 5 ]
+var lista_nome_navios = [ 'submarino', 'navio de reconhecimento', 'navio de guerra', 'navio de guerra', 'porta aviões']
 
 // indica se o proximo click no tabuleiro sera para modificar um navio
 var modificar_navio = false
@@ -21,12 +22,6 @@ criarOpcoesTamanhos();
 function criarOpcoesTamanhos() {
 	// Cria as opcoes na pagina conforme os tamanhos na lista_tam_navios
 
-	// Ordena a lista_tam_navios e remove repeticoes
-	lista_tam_navios.sort()
-	lista_tam_navios = lista_tam_navios.filter(function(elemento, index){
-		return lista_tam_navios.indexOf(elemento) == index
-	})
-
 	// div onde ficam as opcoes
 	var div = document.getElementById('opcoes_tamanho_navio')
 
@@ -36,9 +31,9 @@ function criarOpcoesTamanhos() {
 		// cria um elemento HTML input
 		var input = document.createElement('input')
 		input.type='radio'
-		input.id='escolhaNavio'+tam
+		input.id = 'escolhaNavio'+indice
 		input.name='tipo_navio'
-		input.value=''+tam
+		input.value=''+indice
 
 		// se for o primeiroa ser adicionado deixar marcado como padrao
 		if(indice == 0)
@@ -50,8 +45,8 @@ function criarOpcoesTamanhos() {
 		// criar o elemento label, que e o texto (rotulo) que aparece pro usuario
 		var label = document.createElement('label')
 		label.id = input.id+'_nome'
-		label.setAttribute("for", 'escolhaNavio'+tam)
-		label.innerHTML = 'Navio ('+tam+' casas)'
+		label.setAttribute("for", input.id)
+		label.innerHTML = lista_nome_navios[indice]+' ('+tam+' casas)'
 
 		// add o label na div
 		div.appendChild(label)
@@ -140,8 +135,9 @@ function mostrar_navio() {
 
 	// identificar qual o tamanho do navio a ser mostrado
 	var tam_navio = tamanho_do_navio();
+	var indice_navio = indice_do_navio();
 
-	if(verificarSeNavioInserido(tam_navio)){
+	if(verificarSeNavioInserido(indice_navio)){
 		return
 	}
 
@@ -149,7 +145,7 @@ function mostrar_navio() {
 	mostrar_mar();
 
 	// cria um novo navio, que e mostrado ao usuario antes de ser fixado
-	novo_navio = new Navio(tam_navio, new Coordenada(linha, coluna), orientacao)
+	novo_navio = new Navio(indice_navio, tam_navio, new Coordenada(linha, coluna), orientacao)
 
 	if(navio_valido(novo_navio)){
 		// Se for possivel adicionar o navio nessa posição, mostrar o novo navio ao usuario
@@ -256,7 +252,7 @@ function add_navio() {
 
 	lista_navios.push(novo_navio)
 
-	addConfirmacaoNavioInserido(novo_navio.tamanho)
+	addConfirmacaoNavioInserido()
 	novo_navio = null
 
 	console.log(lista_navios)
@@ -298,7 +294,11 @@ function remover_navio(navio) {
 	removerConfirmacaoNavioInserido(navio.tamanho)
 }
 
-function tamanho_do_navio(){ 
+function tamanho_do_navio(){
+	return lista_tam_navios[indice_do_navio()]
+}
+
+function indice_do_navio(){ 
 	// lista opcoes para o tamanho do navio
 	var opt_check = document.getElementsByName('tipo_navio')
 
@@ -313,29 +313,23 @@ function tamanho_do_navio(){
 		}
 	}
 
-	// estrai do valor do navio escolhido qual o seu tamanho
-	var tamanho = parseInt(opt_check[opcao_escolhida].value.replace(/navio_(\d+)casas/, '$1'))
+	// obtem o indice do navio
+	var indice = parseInt(opt_check[opcao_escolhida].value)
 
-	return tamanho
+	return indice
 }
 
-function setTamanhoNavio(tamanho) {
+function setTamanhoNavio(indice) {
 	// altera o tamanho do navio a ser adicionado
 
 	var opt_check = document.getElementsByName('tipo_navio')
 
-	var tamanho_existe = false
+	var input = opt_check[indice]
 
-	for(var i=0; i<opt_check.length; i++){
-		if(opt_check[i].value == ''+tamanho){
-			opt_check[i].checked = true
-			tamanho_existe = true
-		}
-	}
-
-	if(!tamanho_existe){
+	if(input != null)
+		opt_check[indice].checked = true
+	else
 		console.log('Erro ao mudar tamanho do navio: '+tamanho+' não é um tamanho válido.')
-	}
 }
 
 function iniciar_jogo() {
@@ -355,11 +349,11 @@ function iniciar_jogo() {
 function escrever_cookie() {
 	// salva em cookie os navios adicionados
 	
-	lista_navios.forEach(function(navio, indice){
+	lista_navios.forEach(function(navio){
 		var casas = "casas:"+navio.tamanho
 		var coordenadas = "coordenadas:" + navio.coordenadas.x + "-" + navio.coordenadas.y;
 		var orientacao_navio = "orientacao:" + navio.orientacao;
-		document.cookie = "navio"+(indice+1)+"="+casas+","+coordenadas+","+orientacao_navio;
+		document.cookie = "navio"+(navio.codigo+1)+"="+casas+","+coordenadas+","+orientacao_navio;
 	})
 	document.cookie = "qnt_navios="+lista_navios.length;
 }
@@ -379,8 +373,10 @@ function mudarOrientacao(){
 		orientacao = 'vertical'
 }
 
-function addConfirmacaoNavioInserido(tamNavio){
-	var input = document.getElementById('escolhaNavio'+tamNavio)
+function addConfirmacaoNavioInserido(){
+	var indice = indice_do_navio()
+
+	var input = document.getElementById('escolhaNavio'+indice)
 	input.disabled = true
 
 	var label_nome = document.getElementById(input.id+'_nome')
@@ -389,9 +385,9 @@ function addConfirmacaoNavioInserido(tamNavio){
 	var label_confirmacao = document.getElementById(input.id+'_confirmacao')
 	label_confirmacao.innerHTML = ' OK'
 
-	var prox_tam = selecionarProximoTamanho()
-	if(prox_tam != null)
-		setTamanhoNavio(prox_tam)
+	var prox_navio = selecionarProximoNavio()
+	if(prox_navio != -1)
+		setTamanhoNavio(prox_navio)
 }
 
 function removerConfirmacaoNavioInserido(tamNavio){
@@ -405,11 +401,11 @@ function removerConfirmacaoNavioInserido(tamNavio){
 	label_confirmacao.innerHTML = ''
 }
 
-function verificarSeNavioInserido(tamNavio){
+function verificarSeNavioInserido(indice){
 	var inserido = false
 
 	lista_navios.forEach(function(navio){
-		if(navio.tamanho == tamNavio)
+		if(navio.codigo == indice)
 			inserido = true
 	})
 
@@ -417,23 +413,14 @@ function verificarSeNavioInserido(tamNavio){
 }
 
 function todosNaviosInseridos(){
-	var naviosInseridos = true
-
-	lista_tam_navios.forEach(function(tamanho){
-		if(verificarSeNavioInserido(tamanho) == false)
-			naviosInseridos = false
-	})
-
-	return naviosInseridos
+	return selecionarProximoNavio() == -1
 }
 
-function selecionarProximoTamanho(){
-	var tamanho = null
+function selecionarProximoNavio(){
+	for (var i = 0; i < lista_tam_navios.length; i++) {
+		if(!verificarSeNavioInserido(i))
+			return i
+	}
 
-	lista_tam_navios.forEach(function(tam){
-		if(!verificarSeNavioInserido(tam) && tamanho == null)
-			tamanho = tam
-	})
-
-	return tamanho
+	return -1
 }

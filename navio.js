@@ -1,4 +1,5 @@
-function Navio(tamanho, coordenadas, orientacao){
+function Navio(codigo, tamanho, coordenadas, orientacao){
+	this.codigo = codigo // indice do navio na lista_navios
 	this.tamanho = tamanho // inteiro
 	this.coordenadas = coordenadas // objeto Coordenada
 	this.orientacao = orientacao // String

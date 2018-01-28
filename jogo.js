@@ -13,7 +13,7 @@ analizar_cookie()
 
 // enquanto nao implementar a ia para posicionar os navios: copiar a lista de navios do jogador para lista de navios da ia
 lista_navios_jogador.forEach(function(navio, indice){
-	lista_navios_ia.push(new Navio(navio.tamanho, navio.coordenadas, navio.orientacao))
+	lista_navios_ia.push(new Navio(navio.codigo, navio.tamanho, navio.coordenadas, navio.orientacao))
 })
 
 // mostra os cookies do navegador no console
@@ -49,7 +49,7 @@ function mostrarInfoNavios() {
 function inserir_infoNavios_jogador(tam, indice){
 	var div = document.getElementById('info_navios_jogador')
 
-	var id_navio = 'jogador_infoNavio'+tam
+	var id_navio = 'jogador_infoNavio'+indice
 
 	// label de confirmacao que o navio foi inserido
 	var label = document.createElement('label')
@@ -62,7 +62,7 @@ function inserir_infoNavios_jogador(tam, indice){
 	// criar o elemento label, que e o texto (rotulo) que aparece pro usuario
 	var label = document.createElement('label')
 	label.id = id_navio+'_nome'
-	label.setAttribute("for", 'jogador_infoNavio'+tam)
+	label.setAttribute("for", id_navio)
 	label.innerHTML = 'Navio ('+tam+' casas)'
 
 	// add o label na div
@@ -75,12 +75,12 @@ function inserir_infoNavios_jogador(tam, indice){
 function inserir_infoNavios_ia(tam, indice){
 	var div = document.getElementById('info_navios_ia')
 
-	var id_navio = 'ia_infoNavio'+tam
+	var id_navio = 'ia_infoNavio'+indice
 
 	// criar o elemento label, que e o texto (rotulo) que aparece pro usuario
 	var label = document.createElement('label')
 	label.id = id_navio+'_nome'
-	label.setAttribute("for", 'ia_infoNavio'+tam)
+	label.setAttribute("for", id_navio)
 	label.innerHTML = 'Navio ('+tam+' casas)'
 
 	// add o label na div
@@ -209,8 +209,8 @@ function mostrarAviso(mensagem){
 	document.getElementById("aviso").innerHTML = mensagem;
 }
 
-function informarNavioDestruido(tam) {
-	var id_label = jogadorDaVez+'_infoNavio'+tam+'_destruido'
+function informarNavioDestruido(codigo) {
+	var id_label = jogadorDaVez+'_infoNavio'+codigo+'_destruido'
 	document.getElementById(id_label).innerHTML = ' DESTRUIDO '
 }
 
@@ -232,7 +232,7 @@ function analizar_cookie () {
 		var coordenadas = info_navio.replace(/.*coordenadas:([^,]*).*/, '$1').split('-')
 		var orientacao = info_navio.replace(/.*orientacao:([^,]*).*/, '$1')
 
-		lista_navios_jogador.push(new Navio(casas, new Coordenada(parseInt(coordenadas[0]), parseInt(coordenadas[1])), orientacao))
+		lista_navios_jogador.push(new Navio(i-1, casas, new Coordenada(parseInt(coordenadas[0]), parseInt(coordenadas[1])), orientacao))
 
 		lista_tam_navios.push(casas)
 	}
@@ -354,7 +354,7 @@ function disparo_casa(coordX, coordY, casaElement){
 	navio.atingiuCasa(coord)
 
 	if(navio.destruido()){
-		informarNavioDestruido(navio.tamanho)
+		informarNavioDestruido(navio.codigo)
 	}
 
 	if(destruiuTodosNavios(lista_navios_ia)){
