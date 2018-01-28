@@ -174,8 +174,8 @@ function criarTabuleiroJogador() {
 
 function clique_casa() {
 
-	// se o jogador da vez é a ia, entao o usuario nao pode jogar
-	if(jogadorDaVez == "ia")
+	// se o jogador da vez não for "jogador", entao o usuario nao pode jogar
+	if(jogadorDaVez != "jogador")
 		return;
 
 	// verificar se a casa em que ocorreu o evento ainda não foi descorberta
@@ -242,6 +242,10 @@ function analizar_cookie () {
 	console.log(lista_navios_jogador)
 }
 
+function reiniciarJogo() {
+	window.location = "./index.html";
+}
+
 /*      //////////////       REGRAS DA IA     ///////////////// 
 
 0- Basicamente, a IA tem um vetor de jogadas possiveis, comeca com todas as casas e vai se restrigindo conforme o jogo flui
@@ -260,7 +264,7 @@ function analizar_cookie () {
 async function ia_jogar() {
 	// ALEATORIO
 
-	if(jogadorDaVez == 'jogador')
+	if(jogadorDaVez != 'ia')
 		return;
 	
 	var cel = null
@@ -306,6 +310,16 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function mostrarVencedor(vencedor){
+	console.log("JOGADOR VENCEU!!!")
+
+	document.getElementById('jogadorDaVez').innerHTML = 'FIM DE JOGO - VENCEDOR: ' + vencedor
+
+	document.getElementById('reiniciar').hidden = false
+
+	jogadorDaVez = 'fim de jogo'
+}
+
 function disparo_casa(coordX, coordY, casaElement){
 
 	var coord = new Coordenada(coordX, coordY)
@@ -341,6 +355,12 @@ function disparo_casa(coordX, coordY, casaElement){
 
 	if(navio.destruido()){
 		informarNavioDestruido(navio.tamanho)
+	}
+
+	if(destruiuTodosNavios(lista_navios_ia)){
+		mostrarVencedor('jogador')
+	}else if(destruiuTodosNavios(lista_navios_jogador)){
+		mostrarVencedor('ia')
 	}
 
 	

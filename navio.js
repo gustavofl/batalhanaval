@@ -74,3 +74,14 @@ function getNavioPelaPosicao(coord, lista_navios) {
 
 	return navio_procurado
 }
+
+function destruiuTodosNavios(lista_navios){
+	var tudoDestruido = true
+
+	lista_navios.forEach(function(navio){
+		if(!navio.destruido())
+			tudoDestruido = false
+	})
+
+	return tudoDestruido
+}
