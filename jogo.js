@@ -311,9 +311,9 @@ function disparo_casa(coordX, coordY, casaElement){
 	var coord = new Coordenada(coordX, coordY)
 
 	if(jogadorDaVez == 'jogador')
-		var navio = getNavioPelaPosicao(coord, lista_navios_jogador)
-	else
 		var navio = getNavioPelaPosicao(coord, lista_navios_ia)
+	else
+		var navio = getNavioPelaPosicao(coord, lista_navios_jogador)
 	
 	mostrarAviso('Ultima jogada: '+jogadorDaVez+' ('+(coordY+1)+','+(coordX+1)+')')
 	
@@ -342,6 +342,7 @@ function disparo_casa(coordX, coordY, casaElement){
 	if(navio.destruido()){
 		informarNavioDestruido(navio.tamanho)
 	}
+
 	
 	// Definindo o vetor das proximas jogadas ao acertar um navio
 	if(jogadorDaVez == 'ia'){
@@ -382,18 +383,18 @@ function disparo_casa(coordX, coordY, casaElement){
 
 function checaNaviosPendentes(){
 	lista_jogadas = []
-	for(let k = 0; k < lista_navios_ia.length; k++){
+	for(let k = 0; k < lista_navios_jogador.length; k++){
 		var count = 0
 		var indice = 0
 
-		for(let i = 0; i < lista_navios_ia[k].casasAtingidas.length; i++){
-			if(lista_navios_ia[k].casasAtingidas[i] == true){
+		for(let i = 0; i < lista_navios_jogador[k].casasAtingidas.length; i++){
+			if(lista_navios_jogador[k].casasAtingidas[i] == true){
 				indice = i
 				count++
 			}
 		}
 				
-		var navio_casas = lista_navios_ia[k].casas()
+		var navio_casas = lista_navios_jogador[k].casas()
 		if(count == 1){
 			if(navio_casas[indice].x - 1 >= 0){
 				coord1 = new Coordenada(navio_casas[indice].x -1, navio_casas[indice].y)
@@ -481,7 +482,7 @@ function checaNaviosAoRedor(coord){
 		if(cel1.className == 'acertou_navio'){
 			var coordenada = new Coordenada(coord.x-1, coord.y)
 			console.log("entra11")
-			var navio2 = getNavioPelaPosicao(coordenada, lista_navios_ia)
+			var navio2 = getNavioPelaPosicao(coordenada, lista_navios_jogador)
 			if(!navio2.destruido()){
 				console.log("entra1")
 				if(coord.x+1 <= 9){
@@ -490,7 +491,7 @@ function checaNaviosAoRedor(coord){
 				}
 				for(let k = coord.x; k > 0; k--){
 					var coordenada = new Coordenada(k-1, coord.y)
-					var navio2 = getNavioPelaPosicao(coordenada, lista_navios_ia)
+					var navio2 = getNavioPelaPosicao(coordenada, lista_navios_jogador)
 					var id_cel1 = "ia_cel:"+(k-1)+"-"+coord.y
 					var cel1 = document.getElementById(id_cel1).getElementsByTagName('img')[0]
 					
@@ -514,7 +515,7 @@ function checaNaviosAoRedor(coord){
 		if(cel2.className == 'acertou_navio'){
 			console.log("entra22")
 			var coordenada =new Coordenada(coord.x+1, coord.y)
-			var navio2 = getNavioPelaPosicao(coordenada, lista_navios_ia)
+			var navio2 = getNavioPelaPosicao(coordenada, lista_navios_jogador)
 			if(!navio2.destruido()){
 				console.log("entra2")
 				if(coord.x -1>=0){
@@ -523,7 +524,7 @@ function checaNaviosAoRedor(coord){
 				}
 				for(let k = coord.x; k < 9; k++){
 					var coordenada = new Coordenada(k+1, coord.y)
-					var navio2 = getNavioPelaPosicao(coordenada, lista_navios_ia)
+					var navio2 = getNavioPelaPosicao(coordenada, lista_navios_jogador)
 					var id_cel2 = "ia_cel:"+(k+1)+"-"+coord.y
 					var cel2 = document.getElementById(id_cel2).getElementsByTagName('img')[0]
 					
@@ -549,7 +550,7 @@ function checaNaviosAoRedor(coord){
 		if(cel3.className == 'acertou_navio'){
 			console.log("entra33")
 			var coordenada = new Coordenada(coord.x, coord.y-1)
-			var navio2 = getNavioPelaPosicao(coordenada, lista_navios_ia)
+			var navio2 = getNavioPelaPosicao(coordenada, lista_navios_jogador)
 			if(!navio2.destruido()){
 				console.log("entra3")
 				if(coord.y +1 <= 9){
@@ -558,7 +559,7 @@ function checaNaviosAoRedor(coord){
 				}
 				for(let k = coord.y; k > 0; k--){
 					var coordenada = new Coordenada(coord.x, k-1)
-					var navio2 = getNavioPelaPosicao(coordenada, lista_navios_ia)
+					var navio2 = getNavioPelaPosicao(coordenada, lista_navios_jogador)
 					var id_cel3 = "ia_cel:"+coord.x+"-"+(k-1)
 					var cel3 = document.getElementById(id_cel3).getElementsByTagName('img')[0]
 					
@@ -583,7 +584,7 @@ function checaNaviosAoRedor(coord){
 		if(cel4.className == 'acertou_navio'){
 			console.log("entra44")
 			var coordenada = new Coordenada(coord.x, coord.y+1)
-			var navio2 = getNavioPelaPosicao(coordenada, lista_navios_ia)
+			var navio2 = getNavioPelaPosicao(coordenada, lista_navios_jogador)
 			if(!navio2.destruido()){
 				console.log("entra4")
 				if(coord.y -1 >= 0){
@@ -592,7 +593,7 @@ function checaNaviosAoRedor(coord){
 				}
 				for(let k = coord.y; k < 9; k++){
 					var coordenada = new Coordenada(coord.x, k+1)
-					var navio2 = getNavioPelaPosicao(coordenada, lista_navios_ia)
+					var navio2 = getNavioPelaPosicao(coordenada, lista_navios_jogador)
 					var id_cel4 = "ia_cel:"+coord.x+"-"+(k+1)
 					var cel4 = document.getElementById(id_cel4).getElementsByTagName('img')[0]
 								
