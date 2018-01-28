@@ -195,37 +195,6 @@ function clique_casa() {
 	ia_jogar()
 }
 
-function disparo_casa_master(coordX, coordY, casaElement){
-
-	var coord = new Coordenada(coordX, coordY)
-
-	if(jogadorDaVez == 'jogador')
-		var navio = getNavioPelaPosicao(coord, lista_navios_jogador)
-	else
-		var navio = getNavioPelaPosicao(coord, lista_navios_ia)
-
-	mostrarAviso('Ultima jogada: '+jogadorDaVez+' ('+(coordY+1)+','+(coordX+1)+')')
-	
-	if(navio == null){
-		// se não tiver um navio associado a essa casa então ecertou o mar
-		casaElement.className = "acertou_mar"
-		casaElement.src = "./imagens/jogo_acertou_mar.png";
-
-		alternarJogador()
-		return false
-	}
-
-	// se tiver um navio associado a essa casa entao acertou um navio
-	casaElement.className = "acertou_navio"
-	casaElement.src = "./imagens/jogo_acertou_navio.png";
-
-	if(navio.destruido()){
-		informarNavioDestruido(navio.tamanho)
-	}
-
-	return true
-}
-
 function alternarJogador() {
 
 	if(jogadorDaVez == 'ia')
