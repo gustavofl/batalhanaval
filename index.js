@@ -213,7 +213,7 @@ function alterar_navio(casa_tabuleiro) {
 	remover_navio(navio)
 
 	// configuracao para que o proximo navio a ser adicionado seja identico ao que foi removido
-	setTamanhoNavio(navio.tamanho)
+	setTamanhoNavio(navio.codigo)
 	orientacao = navio.orientacao
 
 	// retira o aviso para escolher um navio para ser modificado
@@ -291,7 +291,7 @@ function remover_navio(navio) {
 		celula.getElementsByTagName("img")[0].src = "./imagens/index_mar.png";
 	})
 
-	removerConfirmacaoNavioInserido(navio.tamanho)
+	removerConfirmacaoNavioInserido(navio.codigo)
 }
 
 function tamanho_do_navio(){
@@ -390,9 +390,10 @@ function addConfirmacaoNavioInserido(){
 		setTamanhoNavio(prox_navio)
 }
 
-function removerConfirmacaoNavioInserido(tamNavio){
-	var input = document.getElementById('escolhaNavio'+tamNavio)
+function removerConfirmacaoNavioInserido(indice){
+	var input = document.getElementById('escolhaNavio'+indice)
 	input.disabled = false
+	input.checked = true
 
 	var label_nome = document.getElementById(input.id+'_nome')
 	label_nome.setAttribute('style', 'color:black')
