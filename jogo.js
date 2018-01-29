@@ -685,7 +685,7 @@ function adicionar_Navio_Aleatorio_IA(){
 	do{
 
 		x = Math.floor((Math.random() * 4) + 0)
-		y = Math.floor((Math.random() * 9) + 5);
+		y = Math.floor((Math.random() * 4) + 5);
 
 		aleatoriaPosNav = Math.floor((Math.random() * 4) + 0)
 
@@ -714,8 +714,8 @@ function adicionar_Navio_Aleatorio_IA(){
 
 	do{
 
-		x = Math.floor((Math.random() * 9) + 5)
-		y = Math.floor((Math.random() * 9) + 5);
+		x = Math.floor((Math.random() * 4) + 5)
+		y = Math.floor((Math.random() * 4) + 5);
 
 		aleatoriaPosNav = Math.floor((Math.random() * 4) + 0)
 
@@ -745,8 +745,8 @@ function adicionar_Navio_Aleatorio_IA(){
 
 	do{
 
-		x = Math.floor((Math.random() * 9) + 5)
-		y = Math.floor((Math.random() * 9) + 5);
+		x = Math.floor((Math.random() * 4) + 5)
+		y = Math.floor((Math.random() * 4) + 0);
 
 		aleatoriaPosNav = Math.floor((Math.random() * 4) + 0)
 
@@ -775,8 +775,8 @@ function adicionar_Navio_Aleatorio_IA(){
 
 	do{
 
-		x = Math.floor((Math.random() * 9) + 0)
-		y = Math.floor((Math.random() * 9) + 0);
+		x = Math.floor((Math.random() * 4) + 0)
+		y = Math.floor((Math.random() * 4) + 0);
 
 		aleatoriaPosNav = Math.floor((Math.random() * 4) + 0)
 
